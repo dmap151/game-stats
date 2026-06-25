@@ -1,0 +1,15 @@
+import 'game.dart';
+
+class PlayerStatistics {
+  final int totalMatchesPlayed;
+  final int totalWins;
+  final double globalWinRate;
+  final Game? mostPlayedGame;
+
+  PlayerStatistics({
+    required this.totalMatchesPlayed,
+    required this.totalWins,
+    required this.globalWinRate,
+    this.mostPlayedGame,
+  });
+}
