@@ -8,6 +8,7 @@ import '../../data/models/match_record.dart';
 import '../../data/models/player.dart';
 import '../../providers/providers.dart';
 import '../widgets/score_chart.dart';
+import '../widgets/full_screen_image_viewer.dart';
 import 'match_entry_screen.dart';
 
 enum SortMode { dateDesc, dateAsc }
@@ -220,13 +221,21 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                 if (r.imagePath != null)
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        File(r.imagePath!),
-                                        height: 150,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        FullScreenImageViewer.show(context, File(r.imagePath!), 'match_${r.id}');
+                                      },
+                                      child: Hero(
+                                        tag: 'match_${r.id}',
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.file(
+                                            File(r.imagePath!),
+                                            height: 150,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -273,12 +282,22 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                             leading: Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: index == 0 ? theme.colorScheme.secondary : theme.colorScheme.primaryContainer,
-                                  backgroundImage: pInfo?.imagePath != null ? FileImage(File(pInfo!.imagePath!)) : null,
-                                  child: pInfo?.imagePath == null 
-                                    ? Text(playerName.substring(0, 1).toUpperCase()) 
-                                    : null,
+                                GestureDetector(
+                                  onTap: () {
+                                    if (pInfo?.imagePath != null) {
+                                      FullScreenImageViewer.show(context, File(pInfo!.imagePath!), 'ranking_player_${pInfo.id}');
+                                    }
+                                  },
+                                  child: Hero(
+                                    tag: 'ranking_player_${pInfo?.id ?? playerId}',
+                                    child: CircleAvatar(
+                                      backgroundColor: index == 0 ? theme.colorScheme.secondary : theme.colorScheme.primaryContainer,
+                                      backgroundImage: pInfo?.imagePath != null ? FileImage(File(pInfo!.imagePath!)) : null,
+                                      child: pInfo?.imagePath == null 
+                                        ? Text(playerName.substring(0, 1).toUpperCase()) 
+                                        : null,
+                                    ),
+                                  ),
                                 ),
                                 Positioned(
                                   bottom: -5,

@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../../data/models/player.dart';
 import '../../providers/providers.dart';
+import '../widgets/full_screen_image_viewer.dart';
 import 'player_details_screen.dart';
 
 class PlayersScreen extends ConsumerStatefulWidget {
@@ -87,12 +88,22 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    backgroundImage: player.imagePath != null ? FileImage(File(player.imagePath!)) : null,
-                    child: player.imagePath == null 
-                        ? Text(player.name.substring(0, 1).toUpperCase()) 
-                        : null,
+                  leading: GestureDetector(
+                    onTap: () {
+                      if (player.imagePath != null) {
+                        FullScreenImageViewer.show(context, File(player.imagePath!), 'player_list_${player.id}');
+                      }
+                    },
+                    child: Hero(
+                      tag: 'player_list_${player.id}',
+                      child: CircleAvatar(
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        backgroundImage: player.imagePath != null ? FileImage(File(player.imagePath!)) : null,
+                        child: player.imagePath == null 
+                            ? Text(player.name.substring(0, 1).toUpperCase()) 
+                            : null,
+                      ),
+                    ),
                   ),
                   title: Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.chevron_right),

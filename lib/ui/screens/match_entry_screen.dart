@@ -10,6 +10,7 @@ import '../../data/models/match_record.dart';
 import '../../data/models/game.dart';
 import '../../data/models/player.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/full_screen_image_viewer.dart';
 
 class _PlayerEntryForm {
   int? playerId;
@@ -275,15 +276,25 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                       Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: theme.colorScheme.outlineVariant),
-                              image: DecorationImage(
-                                image: FileImage(_selectedImage!),
-                                fit: BoxFit.cover,
+                          GestureDetector(
+                            onTap: () {
+                              if (_selectedImage != null) {
+                                FullScreenImageViewer.show(context, _selectedImage!, 'match_preview');
+                              }
+                            },
+                            child: Hero(
+                              tag: 'match_preview',
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                                  image: DecorationImage(
+                                    image: FileImage(_selectedImage!),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

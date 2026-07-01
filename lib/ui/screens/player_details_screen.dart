@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../data/models/player.dart';
 import '../../providers/providers.dart';
+import '../widgets/full_screen_image_viewer.dart';
 import 'game_details_screen.dart';
 
 class PlayerDetailsScreen extends ConsumerStatefulWidget {
@@ -161,13 +162,23 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
               Center(
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      backgroundImage: _currentPlayer.imagePath != null ? FileImage(File(_currentPlayer.imagePath!)) : null,
-                      child: _currentPlayer.imagePath == null 
-                          ? Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)) 
-                          : null,
+                    GestureDetector(
+                      onTap: () {
+                        if (_currentPlayer.imagePath != null) {
+                          FullScreenImageViewer.show(context, File(_currentPlayer.imagePath!), 'player_detail_${_currentPlayer.id}');
+                        }
+                      },
+                      child: Hero(
+                        tag: 'player_detail_${_currentPlayer.id}',
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          backgroundImage: _currentPlayer.imagePath != null ? FileImage(File(_currentPlayer.imagePath!)) : null,
+                          child: _currentPlayer.imagePath == null 
+                              ? Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)) 
+                              : null,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
