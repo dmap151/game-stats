@@ -27,13 +27,18 @@ const MatchRecordSchema = CollectionSchema(
       name: r'imagePath',
       type: IsarType.string,
     ),
-    r'numberOfPlayers': PropertySchema(
+    r'imagePaths': PropertySchema(
       id: 2,
+      name: r'imagePaths',
+      type: IsarType.stringList,
+    ),
+    r'numberOfPlayers': PropertySchema(
+      id: 3,
       name: r'numberOfPlayers',
       type: IsarType.long,
     ),
     r'playerScores': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'playerScores',
       type: IsarType.objectList,
       target: r'PlayerScore',
@@ -72,6 +77,13 @@ int _matchRecordEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.imagePaths.length * 3;
+  {
+    for (var i = 0; i < object.imagePaths.length; i++) {
+      final value = object.imagePaths[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.playerScores.length * 3;
   {
     final offsets = allOffsets[PlayerScore]!;
@@ -91,9 +103,10 @@ void _matchRecordSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.date);
   writer.writeString(offsets[1], object.imagePath);
-  writer.writeLong(offsets[2], object.numberOfPlayers);
+  writer.writeStringList(offsets[2], object.imagePaths);
+  writer.writeLong(offsets[3], object.numberOfPlayers);
   writer.writeObjectList<PlayerScore>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     PlayerScoreSchema.serialize,
     object.playerScores,
@@ -110,9 +123,10 @@ MatchRecord _matchRecordDeserialize(
   object.date = reader.readDateTime(offsets[0]);
   object.id = id;
   object.imagePath = reader.readStringOrNull(offsets[1]);
-  object.numberOfPlayers = reader.readLong(offsets[2]);
+  object.imagePaths = reader.readStringList(offsets[2]) ?? [];
+  object.numberOfPlayers = reader.readLong(offsets[3]);
   object.playerScores = reader.readObjectList<PlayerScore>(
-        offsets[3],
+        offsets[4],
         PlayerScoreSchema.deserialize,
         allOffsets,
         PlayerScore(),
@@ -133,8 +147,10 @@ P _matchRecordDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 3:
+      return (reader.readLong(offset)) as P;
+    case 4:
       return (reader.readObjectList<PlayerScore>(
             offset,
             PlayerScoreSchema.deserialize,
@@ -502,6 +518,231 @@ extension MatchRecordQueryFilter
   }
 
   QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'imagePaths',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'imagePaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'imagePaths',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePaths',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'imagePaths',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      imagePathsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'imagePaths',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
       numberOfPlayersEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -780,6 +1021,12 @@ extension MatchRecordQueryWhereDistinct
     });
   }
 
+  QueryBuilder<MatchRecord, MatchRecord, QDistinct> distinctByImagePaths() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'imagePaths');
+    });
+  }
+
   QueryBuilder<MatchRecord, MatchRecord, QDistinct>
       distinctByNumberOfPlayers() {
     return QueryBuilder.apply(this, (query) {
@@ -805,6 +1052,13 @@ extension MatchRecordQueryProperty
   QueryBuilder<MatchRecord, String?, QQueryOperations> imagePathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imagePath');
+    });
+  }
+
+  QueryBuilder<MatchRecord, List<String>, QQueryOperations>
+      imagePathsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'imagePaths');
     });
   }
 

@@ -20,7 +20,8 @@ class MatchRecord {
   late DateTime date;
   late int numberOfPlayers;
   
-  String? imagePath;
+  String? imagePath; // Keep for backwards compatibility
+  List<String> imagePaths = [];
   
   List<PlayerScore> playerScores = [];
 

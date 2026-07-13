@@ -81,6 +81,27 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
     );
   }
 
+  Widget _buildImageThumbnail(BuildContext context, String path, String heroTag) {
+    return GestureDetector(
+      onTap: () {
+        FullScreenImageViewer.show(context, File(path), heroTag);
+      },
+      child: Hero(
+        tag: heroTag,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            File(path),
+            height: 150,
+            width: 150,
+            fit: BoxFit.cover,
+            cacheWidth: 400,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -218,24 +239,24 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                 '${DateFormat('dd.MM.yyyy').format(r.date)} - ${r.numberOfPlayers} Spieler',
                               ),
                               children: [
-                                if (r.imagePath != null)
+                                if (r.imagePath != null || r.imagePaths.isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        FullScreenImageViewer.show(context, File(r.imagePath!), 'match_${r.id}');
-                                      },
-                                      child: Hero(
-                                        tag: 'match_${r.id}',
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Image.file(
-                                            File(r.imagePath!),
-                                            height: 150,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          if (r.imagePath != null) ...[
+                                            _buildImageThumbnail(context, r.imagePath!, 'match_${r.id}_0'),
+                                            const SizedBox(width: 8),
+                                          ],
+                                          ...r.imagePaths.asMap().entries.map((entry) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(right: 8.0),
+                                              child: _buildImageThumbnail(context, entry.value, 'match_${r.id}_${entry.key + 1}'),
+                                            );
+                                          }).toList(),
+                                        ],
                                       ),
                                     ),
                                   ),

@@ -35,7 +35,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _gameNameController = TextEditingController();
   DateTime _date = DateTime.now();
-  File? _selectedImage;
+  List<File> _selectedImages = [];
 
   final List<_PlayerEntryForm> _playerEntries = [];
 
@@ -49,7 +49,13 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       if (match.imagePath != null) {
         final file = File(match.imagePath!);
         if (file.existsSync()) {
-          _selectedImage = file;
+          _selectedImages.add(file);
+        }
+      }
+      for (var path in match.imagePaths) {
+        final file = File(path);
+        if (file.existsSync()) {
+          _selectedImages.add(file);
         }
       }
       for (var ps in match.playerScores) {
@@ -73,12 +79,20 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
-
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
+    if (source == ImageSource.gallery) {
+      final pickedFiles = await picker.pickMultiImage(imageQuality: 80, maxWidth: 1920, maxHeight: 1920);
+      if (pickedFiles.isNotEmpty) {
+        setState(() {
+          _selectedImages.addAll(pickedFiles.map((x) => File(x.path)));
+        });
+      }
+    } else {
+      final pickedFile = await picker.pickImage(source: source, imageQuality: 80, maxWidth: 1920, maxHeight: 1920);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImages.add(File(pickedFile.path));
+        });
+      }
     }
   }
 
@@ -144,9 +158,19 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         return;
       }
 
-      String? finalImagePath = widget.existingMatch?.imagePath;
-      if (_selectedImage != null && _selectedImage!.path != finalImagePath) {
-        finalImagePath = await _saveImageLocally(_selectedImage!);
+      List<String> finalImagePaths = [];
+      for (var img in _selectedImages) {
+        bool isExisting = false;
+        if (widget.existingMatch != null) {
+          if (widget.existingMatch!.imagePath == img.path) isExisting = true;
+          if (widget.existingMatch!.imagePaths.contains(img.path)) isExisting = true;
+        }
+        if (isExisting) {
+          finalImagePaths.add(img.path);
+        } else {
+          final savedPath = await _saveImageLocally(img);
+          if (savedPath != null) finalImagePaths.add(savedPath);
+        }
       }
 
       final db = ref.read(databaseProvider);
@@ -171,7 +195,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       match.game.value = game;
       match.date = _date;
       match.numberOfPlayers = _playerEntries.length;
-      match.imagePath = finalImagePath;
+      match.imagePath = finalImagePaths.isNotEmpty ? finalImagePaths.first : null;
+      match.imagePaths = finalImagePaths.length > 1 ? finalImagePaths.skip(1).toList() : [];
       match.playerScores = scores;
 
       await db.saveMatchRecord(match);
@@ -190,7 +215,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           setState(() {
             _playerEntries.clear();
             _playerEntries.add(_PlayerEntryForm());
-            _selectedImage = null;
+            _selectedImages.clear();
             _date = DateTime.now();
           });
         }
@@ -272,27 +297,36 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                         ],
                       ),
                     ),
-                    if (_selectedImage != null)
-                      Stack(
+                  ],
+                ),
+                if (_selectedImages.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _selectedImages.map((img) {
+                      return Stack(
                         clipBehavior: Clip.none,
                         children: [
                           GestureDetector(
                             onTap: () {
-                              if (_selectedImage != null) {
-                                FullScreenImageViewer.show(context, _selectedImage!, 'match_preview');
-                              }
+                              FullScreenImageViewer.show(context, img, 'match_preview_${img.path}');
                             },
                             child: Hero(
-                              tag: 'match_preview',
+                              tag: 'match_preview_${img.path}',
                               child: Container(
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: theme.colorScheme.outlineVariant),
-                                  image: DecorationImage(
-                                    image: FileImage(_selectedImage!),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    img,
                                     fit: BoxFit.cover,
+                                    cacheWidth: 200,
                                   ),
                                 ),
                               ),
@@ -302,7 +336,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                             top: -10,
                             right: -10,
                             child: IconButton(
-                              onPressed: () => setState(() => _selectedImage = null),
+                              onPressed: () => setState(() => _selectedImages.remove(img)),
                               icon: const Icon(Icons.cancel),
                               color: theme.colorScheme.error,
                               padding: EdgeInsets.zero,
@@ -310,9 +344,10 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                             ),
                           ),
                         ],
-                      ),
-                  ],
-                ),
+                      );
+                    }).toList(),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 
                 Text('Mitspieler', style: theme.textTheme.headlineMedium),
