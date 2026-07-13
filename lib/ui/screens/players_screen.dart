@@ -194,13 +194,15 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 24,
-      ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 24,
+        ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -261,6 +263,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
           ),
           const SizedBox(height: 24),
         ],
+      ),
       ),
     );
   }

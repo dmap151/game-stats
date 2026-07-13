@@ -250,17 +250,27 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final playersAsync = ref.watch(playersProvider);
+    final matchRecordsAsync = ref.watch(matchRecordsProvider);
+    
+    final existingGameNames = matchRecordsAsync.value
+            ?.map((r) => r.game.value?.name)
+            .whereType<String>()
+            .toSet()
+            .toList() ??
+        [];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.existingMatch == null
-              ? 'Ergebnis eintragen'
-              : 'Partie bearbeiten',
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.existingMatch == null
+                ? 'Ergebnis eintragen'
+                : 'Partie bearbeiten',
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: playersAsync.when(
         data: (players) {
           if (players.isEmpty) {
@@ -274,16 +284,38 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                TextFormField(
-                  controller: _gameNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Spielname',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.casino_outlined),
-                  ),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Bitte Spielnamen eingeben'
-                      : null,
+                Autocomplete<String>(
+                  initialValue: TextEditingValue(text: _gameNameController.text),
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return existingGameNames;
+                    }
+                    return existingGameNames.where((String option) {
+                      return option
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (String selection) {
+                    _gameNameController.text = selection;
+                  },
+                  fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                    return TextFormField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      decoration: const InputDecoration(
+                        labelText: 'Spielname',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.casino_outlined),
+                      ),
+                      validator: (value) => value == null || value.trim().isEmpty
+                          ? 'Bitte Spielnamen eingeben'
+                          : null,
+                      onSaved: (val) => _gameNameController.text = val?.trim() ?? '',
+                      onChanged: (val) => _gameNameController.text = val,
+                      onFieldSubmitted: (val) => onFieldSubmitted(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
 
@@ -535,6 +567,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) =>
             const Center(child: Text('Fehler beim Laden der Spieler')),
+      ),
       ),
     );
   }

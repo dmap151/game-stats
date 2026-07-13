@@ -355,13 +355,15 @@ class _EditPlayerBottomSheetState extends State<_EditPlayerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 24,
-      ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 24,
+        ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -422,6 +424,7 @@ class _EditPlayerBottomSheetState extends State<_EditPlayerBottomSheet> {
           ),
           const SizedBox(height: 24),
         ],
+      ),
       ),
     );
   }
