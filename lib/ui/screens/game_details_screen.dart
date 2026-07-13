@@ -260,19 +260,42 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                       ),
                                     ),
                                   ),
-                                ...r.playerScores.map((ps) {
+                                ...((r.playerScores.toList()..sort((a, b) => a.placement.compareTo(b.placement))).map((ps) {
                                   final pInfo = getPlayer(ps.playerId ?? -1);
                                   return ListTile(
                                     leading: CircleAvatar(
                                       radius: 16,
                                       backgroundColor: theme.colorScheme.primaryContainer,
                                       backgroundImage: pInfo?.imagePath != null ? FileImage(File(pInfo!.imagePath!)) : null,
-                                      child: pInfo?.imagePath == null ? Text('#${ps.placement}') : null,
+                                      child: pInfo?.imagePath == null 
+                                        ? Text(ps.playerName?.isNotEmpty == true ? ps.playerName!.substring(0, 1).toUpperCase() : '?') 
+                                        : null,
                                     ),
                                     title: Text(ps.playerName ?? 'Unbekannt'),
-                                    trailing: Text('${ps.score} Punkte'),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('${ps.score} Punkte', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.secondaryContainer,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            '#${ps.placement}',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.onSecondaryContainer,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   );
-                                }).toList()..sort((a, b) => a.trailing.toString().compareTo(b.trailing.toString())),
+                                }).toList()),
                               ],
                             ),
                           );
