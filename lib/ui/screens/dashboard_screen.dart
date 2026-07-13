@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -88,10 +89,20 @@ class DashboardScreen extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: 8),
                     color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
                     child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        child: const Icon(Icons.history),
-                      ),
+                      leading: match.imagePath != null
+                          ? ClipOval(
+                              child: Image.file(
+                                File(match.imagePath!),
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                cacheWidth: 100,
+                              ),
+                            )
+                          : CircleAvatar(
+                              backgroundColor: theme.colorScheme.primaryContainer,
+                              child: const Icon(Icons.history),
+                            ),
                       title: Text(gameName, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(
                         '${DateFormat('dd.MM.yyyy').format(match.date)} • ${winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden'}',
