@@ -75,15 +75,29 @@ class DashboardScreen extends ConsumerWidget {
                 );
               }
 
-              // Sort matches by date descending and take the top 10
-              final recentMatches = List.of(records)
-                ..sort((a, b) => b.date.compareTo(a.date));
+              final chronologicalRecords = List.of(records)
+                ..sort((a, b) => a.date.compareTo(b.date));
+                
+              final matchIndices = <int, int>{};
+              final gameCounts = <int, int>{};
+              for (final r in chronologicalRecords) {
+                final gameId = r.game.value?.id;
+                if (gameId != null) {
+                  final count = (gameCounts[gameId] ?? 0) + 1;
+                  gameCounts[gameId] = count;
+                  matchIndices[r.id] = count;
+                }
+              }
+
+              final recentMatches = List.of(chronologicalRecords.reversed);
               final displayMatches = recentMatches.take(10).toList();
 
               return Column(
                 children: [
                   ...displayMatches.map((match) {
-                  final gameName = match.game.value?.name ?? 'Unbekanntes Spiel';
+                  final matchIndex = matchIndices[match.id] ?? 1;
+                  final baseGameName = match.game.value?.name ?? 'Unbekanntes Spiel';
+                  final gameName = '$baseGameName #$matchIndex';
                   final winner = match.playerScores.where((p) => p.placement == 1).firstOrNull;
                   
                   return Card(

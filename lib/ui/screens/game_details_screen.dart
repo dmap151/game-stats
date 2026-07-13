@@ -132,6 +132,12 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
 
             final sortedRecords = _sortRecords(gameRecords);
             
+            final chronologicalGameRecords = List.of(gameRecords)..sort((a, b) => a.date.compareTo(b.date));
+            final matchIndices = <int, int>{};
+            for (int i = 0; i < chronologicalGameRecords.length; i++) {
+              matchIndices[chronologicalGameRecords[i].id] = i + 1;
+            }
+            
             // Calculate Player Rankings (using Player ID to accurately map to pictures)
             final playerWins = <int, int>{};
             final playerMatches = <int, int>{};
@@ -218,7 +224,15 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                     ),
                               title: Row(
                                 children: [
-                                  Expanded(child: Text(winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden')),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('${widget.game.name} #${matchIndices[r.id] ?? 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        Text(winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden', style: theme.textTheme.bodySmall),
+                                      ],
+                                    ),
+                                  ),
                                   PopupMenuButton<String>(
                                     onSelected: (value) {
                                       if (value == 'edit') _editMatch(r);
