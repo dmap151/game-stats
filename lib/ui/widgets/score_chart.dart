@@ -10,20 +10,26 @@ class ScoreChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (records.length < 2) {
+    final validRecords = records.where((r) => r.playerScores.any((s) => s.score != null)).toList();
+    if (validRecords.length < 2) {
       return const Center(
-        child: Text('Nicht genug Daten für ein Diagramm (min. 2 Partien nötig)'),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Nicht genug Daten für ein Diagramm (min. 2 Partien mit Punkten nötig)',
+            textAlign: TextAlign.center,
+          ),
+        ),
       );
     }
 
     final theme = Theme.of(context);
-    final sortedRecords = List<MatchRecord>.from(records)..sort((a, b) => a.date.compareTo(b.date));
+    final sortedRecords = List<MatchRecord>.from(validRecords)..sort((a, b) => a.date.compareTo(b.date));
 
     // Convert to spots (using the highest score of each match for the trend)
     final spots = sortedRecords.asMap().entries.map((e) {
-      final maxScore = e.value.playerScores.isEmpty 
-          ? 0 
-          : e.value.playerScores.map((s) => s.score).reduce((a, b) => a > b ? a : b);
+      final validScores = e.value.playerScores.where((s) => s.score != null).map((s) => s.score!);
+      final maxScore = validScores.isEmpty ? 0 : validScores.reduce((a, b) => a > b ? a : b);
       return FlSpot(e.key.toDouble(), maxScore.toDouble());
     }).toList();
 

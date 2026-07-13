@@ -1151,7 +1151,7 @@ PlayerScore _playerScoreDeserialize(
   object.placement = reader.readLong(offsets[0]);
   object.playerId = reader.readLongOrNull(offsets[1]);
   object.playerName = reader.readStringOrNull(offsets[2]);
-  object.score = reader.readLong(offsets[3]);
+  object.score = reader.readLongOrNull(offsets[3]);
   return object;
 }
 
@@ -1169,7 +1169,7 @@ P _playerScoreDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1460,8 +1460,25 @@ extension PlayerScoreQueryFilter
     });
   }
 
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition> scoreIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'score',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      scoreIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'score',
+      ));
+    });
+  }
+
   QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition> scoreEqualTo(
-      int value) {
+      int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'score',
@@ -1472,7 +1489,7 @@ extension PlayerScoreQueryFilter
 
   QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
       scoreGreaterThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1485,7 +1502,7 @@ extension PlayerScoreQueryFilter
   }
 
   QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition> scoreLessThan(
-    int value, {
+    int? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1498,8 +1515,8 @@ extension PlayerScoreQueryFilter
   }
 
   QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition> scoreBetween(
-    int lower,
-    int upper, {
+    int? lower,
+    int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

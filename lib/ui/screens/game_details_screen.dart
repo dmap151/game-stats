@@ -275,8 +275,10 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text('${ps.score} Punkte', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        const SizedBox(width: 12),
+                                        if (ps.score != null) ...[
+                                          Text('${ps.score} Punkte', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          const SizedBox(width: 12),
+                                        ],
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(

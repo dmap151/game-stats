@@ -16,16 +16,13 @@ class _PlayerEntryForm {
   int? playerId;
   String? playerName;
   int placement = 1;
-  int score = 0;
+  int? score;
 }
 
 class MatchEntryScreen extends ConsumerStatefulWidget {
   final MatchRecord? existingMatch;
 
-  const MatchEntryScreen({
-    super.key,
-    this.existingMatch,
-  });
+  const MatchEntryScreen({super.key, this.existingMatch});
 
   @override
   ConsumerState<MatchEntryScreen> createState() => _MatchEntryScreenState();
@@ -59,11 +56,12 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         }
       }
       for (var ps in match.playerScores) {
-        _playerEntries.add(_PlayerEntryForm()
-          ..playerId = ps.playerId
-          ..playerName = ps.playerName
-          ..placement = ps.placement
-          ..score = ps.score
+        _playerEntries.add(
+          _PlayerEntryForm()
+            ..playerId = ps.playerId
+            ..playerName = ps.playerName
+            ..placement = ps.placement
+            ..score = ps.score,
         );
       }
     } else {
@@ -80,14 +78,23 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     if (source == ImageSource.gallery) {
-      final pickedFiles = await picker.pickMultiImage(imageQuality: 80, maxWidth: 1920, maxHeight: 1920);
+      final pickedFiles = await picker.pickMultiImage(
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
       if (pickedFiles.isNotEmpty) {
         setState(() {
           _selectedImages.addAll(pickedFiles.map((x) => File(x.path)));
         });
       }
     } else {
-      final pickedFile = await picker.pickImage(source: source, imageQuality: 80, maxWidth: 1920, maxHeight: 1920);
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
       if (pickedFile != null) {
         setState(() {
           _selectedImages.add(File(pickedFile.path));
@@ -127,7 +134,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
   void _addPlayerEntry() {
     setState(() {
-      _playerEntries.add(_PlayerEntryForm()..placement = _playerEntries.length + 1);
+      _playerEntries.add(
+        _PlayerEntryForm()..placement = _playerEntries.length + 1,
+      );
     });
   }
 
@@ -140,7 +149,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   Future<String?> _saveImageLocally(File image) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}${p.extension(image.path)}';
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}${p.extension(image.path)}';
       final savedImage = await image.copy('${directory.path}/$fileName');
       return savedImage.path;
     } catch (e) {
@@ -153,7 +163,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
     if (_formKey.currentState!.validate()) {
       if (_playerEntries.any((p) => p.playerId == null)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bitte für jeden Eintrag einen Spieler auswählen.')),
+          const SnackBar(
+            content: Text('Bitte für jeden Eintrag einen Spieler auswählen.'),
+          ),
         );
         return;
       }
@@ -163,7 +175,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         bool isExisting = false;
         if (widget.existingMatch != null) {
           if (widget.existingMatch!.imagePath == img.path) isExisting = true;
-          if (widget.existingMatch!.imagePaths.contains(img.path)) isExisting = true;
+          if (widget.existingMatch!.imagePaths.contains(img.path))
+            isExisting = true;
         }
         if (isExisting) {
           finalImagePaths.add(img.path);
@@ -175,7 +188,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
       final db = ref.read(databaseProvider);
       final gameName = _gameNameController.text.trim();
-      
+
       var game = await db.getGameByName(gameName);
       if (game == null) {
         game = Game()..name = gameName;
@@ -195,17 +208,27 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       match.game.value = game;
       match.date = _date;
       match.numberOfPlayers = _playerEntries.length;
-      match.imagePath = finalImagePaths.isNotEmpty ? finalImagePaths.first : null;
-      match.imagePaths = finalImagePaths.length > 1 ? finalImagePaths.skip(1).toList() : [];
+      match.imagePath = finalImagePaths.isNotEmpty
+          ? finalImagePaths.first
+          : null;
+      match.imagePaths = finalImagePaths.length > 1
+          ? finalImagePaths.skip(1).toList()
+          : [];
       match.playerScores = scores;
 
       await db.saveMatchRecord(match);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.existingMatch == null ? 'Ergebnis gespeichert!' : 'Änderungen gespeichert!')),
+          SnackBar(
+            content: Text(
+              widget.existingMatch == null
+                  ? 'Ergebnis gespeichert!'
+                  : 'Änderungen gespeichert!',
+            ),
+          ),
         );
-        
+
         if (widget.existingMatch != null) {
           // If we are editing, pop back to the details screen
           Navigator.pop(context);
@@ -230,7 +253,11 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingMatch == null ? 'Ergebnis eintragen' : 'Partie bearbeiten'),
+        title: Text(
+          widget.existingMatch == null
+              ? 'Ergebnis eintragen'
+              : 'Partie bearbeiten',
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -254,8 +281,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.casino_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Bitte Spielnamen eingeben' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Bitte Spielnamen eingeben'
+                      : null,
                 ),
                 const SizedBox(height: 24),
 
@@ -287,7 +315,10 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Erinnerungsfoto (optional)', style: theme.textTheme.labelLarge),
+                          Text(
+                            'Erinnerungsfoto (optional)',
+                            style: theme.textTheme.labelLarge,
+                          ),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             onPressed: _showImageSourceDialog,
@@ -310,7 +341,11 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              FullScreenImageViewer.show(context, img, 'match_preview_${img.path}');
+                              FullScreenImageViewer.show(
+                                context,
+                                img,
+                                'match_preview_${img.path}',
+                              );
                             },
                             child: Hero(
                               tag: 'match_preview_${img.path}',
@@ -319,7 +354,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                                 height: 80,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                                  border: Border.all(
+                                    color: theme.colorScheme.outlineVariant,
+                                  ),
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
@@ -336,7 +373,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                             top: -10,
                             right: -10,
                             child: IconButton(
-                              onPressed: () => setState(() => _selectedImages.remove(img)),
+                              onPressed: () =>
+                                  setState(() => _selectedImages.remove(img)),
                               icon: const Icon(Icons.cancel),
                               color: theme.colorScheme.error,
                               padding: EdgeInsets.zero,
@@ -349,17 +387,19 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                   ),
                 ],
                 const SizedBox(height: 32),
-                
+
                 Text('Mitspieler', style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 16),
-                
+
                 ..._playerEntries.asMap().entries.map((entry) {
                   final index = entry.key;
                   final playerForm = entry.value;
 
                   // Ensure the pre-selected playerId actually exists in the current players list
                   // If a player was deleted, we might need to handle this gracefully
-                  final isValidId = players.any((p) => p.id == playerForm.playerId);
+                  final isValidId = players.any(
+                    (p) => p.id == playerForm.playerId,
+                  );
                   if (!isValidId && playerForm.playerId != null) {
                     playerForm.playerId = null;
                   }
@@ -369,7 +409,11 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+                      side: BorderSide(
+                        color: theme.colorScheme.outlineVariant.withOpacity(
+                          0.5,
+                        ),
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -384,21 +428,40 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                                     labelText: 'Spieler auswählen',
                                     border: OutlineInputBorder(),
                                   ),
-                                  items: players.map((p) => DropdownMenuItem(
-                                    value: p.id,
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 12,
-                                          backgroundImage: p.imagePath != null ? FileImage(File(p.imagePath!)) : null,
-                                          child: p.imagePath == null ? Text(p.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 10)) : null,
+                                  items: players
+                                      .map(
+                                        (p) => DropdownMenuItem(
+                                          value: p.id,
+                                          child: Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 12,
+                                                backgroundImage:
+                                                    p.imagePath != null
+                                                    ? FileImage(
+                                                        File(p.imagePath!),
+                                                      )
+                                                    : null,
+                                                child: p.imagePath == null
+                                                    ? Text(
+                                                        p.name
+                                                            .substring(0, 1)
+                                                            .toUpperCase(),
+                                                        style: const TextStyle(
+                                                          fontSize: 10,
+                                                        ),
+                                                      )
+                                                    : null,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(p.name),
+                                            ],
+                                          ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(p.name),
-                                      ],
-                                    ),
-                                  )).toList(),
-                                  onChanged: (val) => setState(() => playerForm.playerId = val),
+                                      )
+                                      .toList(),
+                                  onChanged: (val) =>
+                                      setState(() => playerForm.playerId = val),
                                 ),
                               ),
                               if (_playerEntries.length > 1)
@@ -418,23 +481,28 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                                   decoration: const InputDecoration(
                                     labelText: 'Platz',
                                     border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.emoji_events_outlined),
+                                    prefixIcon: Icon(
+                                      Icons.emoji_events_outlined,
+                                    ),
                                   ),
                                   keyboardType: TextInputType.number,
-                                  onChanged: (val) => playerForm.placement = int.tryParse(val) ?? 1,
+                                  onChanged: (val) => playerForm.placement =
+                                      int.tryParse(val) ?? 1,
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: TextFormField(
-                                  initialValue: playerForm.score.toString(),
+                                  initialValue:
+                                      playerForm.score?.toString() ?? '',
                                   decoration: const InputDecoration(
                                     labelText: 'Punkte',
                                     border: OutlineInputBorder(),
                                     prefixIcon: Icon(Icons.scoreboard_outlined),
                                   ),
                                   keyboardType: TextInputType.number,
-                                  onChanged: (val) => playerForm.score = int.tryParse(val) ?? 0,
+                                  onChanged: (val) => playerForm.score =
+                                      val.isEmpty ? null : int.tryParse(val),
                                 ),
                               ),
                             ],
@@ -444,7 +512,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                     ),
                   );
                 }),
-                
+
                 TextButton.icon(
                   onPressed: _addPlayerEntry,
                   icon: const Icon(Icons.add),
@@ -452,7 +520,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                 ),
                 const SizedBox(height: 32),
                 PrimaryButton(
-                  label: widget.existingMatch == null ? 'Speichern' : 'Änderungen speichern',
+                  label: widget.existingMatch == null
+                      ? 'Speichern'
+                      : 'Änderungen speichern',
                   icon: Icons.save_outlined,
                   onPressed: () => _saveMatch(players),
                 ),
@@ -461,7 +531,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Fehler beim Laden der Spieler')),
+        error: (_, __) =>
+            const Center(child: Text('Fehler beim Laden der Spieler')),
       ),
     );
   }

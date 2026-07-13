@@ -8,7 +8,7 @@ class PlayerScore {
   int? playerId;
   String? playerName;
   int placement = 1;
-  int score = 0;
+  int? score;
 }
 
 @collection
