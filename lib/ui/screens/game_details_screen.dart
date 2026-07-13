@@ -202,9 +202,9 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                             elevation: 0,
                             color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
                             child: ExpansionTile(
-                              leading: CircleAvatar(
-                                backgroundColor: theme.colorScheme.secondary,
-                                child: const Icon(Icons.emoji_events, color: Colors.white, size: 20),
+                              leading: const CircleAvatar(
+                                backgroundColor: Colors.amber,
+                                child: Icon(Icons.emoji_events, color: Colors.black87, size: 20),
                               ),
                               title: Row(
                                 children: [
@@ -289,13 +289,14 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: theme.colorScheme.secondaryContainer,
+                                            color: ps.placement == 1 ? Colors.amber : Colors.transparent,
                                             borderRadius: BorderRadius.circular(12),
+                                            border: ps.placement == 1 ? null : Border.all(color: theme.colorScheme.outlineVariant),
                                           ),
                                           child: Text(
                                             '#${ps.placement}',
                                             style: TextStyle(
-                                              color: theme.colorScheme.onSecondaryContainer,
+                                              color: ps.placement == 1 ? Colors.black87 : theme.colorScheme.onSurfaceVariant,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 12,
                                             ),
@@ -344,7 +345,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                   child: Hero(
                                     tag: 'ranking_player_${pInfo?.id ?? playerId}',
                                     child: CircleAvatar(
-                                      backgroundColor: index == 0 ? theme.colorScheme.secondary : theme.colorScheme.primaryContainer,
+                                      backgroundColor: index == 0 ? Colors.amber : theme.colorScheme.primaryContainer,
                                       child: pInfo?.imagePath != null 
                                         ? ClipOval(
                                             child: Image.file(
@@ -365,13 +366,17 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.surface,
+                                      color: index == 0 ? Colors.amber : theme.colorScheme.surface,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: theme.colorScheme.outlineVariant),
+                                      border: Border.all(color: index == 0 ? Colors.amber.shade700 : theme.colorScheme.outlineVariant),
                                     ),
                                     child: Text(
                                       '#${index + 1}',
-                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+                                      style: TextStyle(
+                                        fontSize: 10, 
+                                        fontWeight: FontWeight.bold, 
+                                        color: index == 0 ? Colors.black87 : theme.colorScheme.onSurface,
+                                      ),
                                     ),
                                   ),
                                 ),

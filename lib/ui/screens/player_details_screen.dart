@@ -226,11 +226,14 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: score.placement == 1 
-                          ? theme.colorScheme.secondary 
+                          ? Colors.amber 
                           : theme.colorScheme.outlineVariant,
                       child: Text(
                         '#${score.placement}',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: score.placement == 1 ? Colors.black87 : Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     title: Text(gameName, style: const TextStyle(fontWeight: FontWeight.bold)),
