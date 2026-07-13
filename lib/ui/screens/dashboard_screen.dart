@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../providers/providers.dart';
 import '../widgets/stat_card.dart';
 import 'game_details_screen.dart';
+import 'match_history_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -80,7 +81,8 @@ class DashboardScreen extends ConsumerWidget {
               final displayMatches = recentMatches.take(10).toList();
 
               return Column(
-                children: displayMatches.map((match) {
+                children: [
+                  ...displayMatches.map((match) {
                   final gameName = match.game.value?.name ?? 'Unbekanntes Spiel';
                   final winner = match.playerScores.where((p) => p.placement == 1).firstOrNull;
                   
@@ -120,7 +122,23 @@ class DashboardScreen extends ConsumerWidget {
                       },
                     ),
                   );
-                }).toList(),
+                }),
+                if (recentMatches.length > 10) ...[
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MatchHistoryScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.history),
+                    label: const Text('Gesamte Historie ansehen'),
+                  ),
+                ],
+                ],
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
