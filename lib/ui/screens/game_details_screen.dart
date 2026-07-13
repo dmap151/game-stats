@@ -202,10 +202,20 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                             elevation: 0,
                             color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
                             child: ExpansionTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.amber,
-                                child: Icon(Icons.emoji_events, color: Colors.black87, size: 20),
-                              ),
+                              leading: r.imagePath != null
+                                  ? ClipOval(
+                                      child: Image.file(
+                                        File(r.imagePath!),
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                        cacheWidth: 100,
+                                      ),
+                                    )
+                                  : const CircleAvatar(
+                                      backgroundColor: Colors.amber,
+                                      child: Icon(Icons.emoji_events, color: Colors.black87, size: 20),
+                                    ),
                               title: Row(
                                 children: [
                                   Expanded(child: Text(winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden')),
