@@ -436,22 +436,24 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                                             children: [
                                               CircleAvatar(
                                                 radius: 12,
-                                                backgroundImage:
-                                                    p.imagePath != null
-                                                    ? FileImage(
-                                                        File(p.imagePath!),
+                                                child: p.imagePath != null
+                                                    ? ClipOval(
+                                                        child: Image.file(
+                                                          File(p.imagePath!),
+                                                          width: 24,
+                                                          height: 24,
+                                                          fit: BoxFit.cover,
+                                                          cacheWidth: 50,
+                                                        ),
                                                       )
-                                                    : null,
-                                                child: p.imagePath == null
-                                                    ? Text(
+                                                    : Text(
                                                         p.name
                                                             .substring(0, 1)
                                                             .toUpperCase(),
                                                         style: const TextStyle(
                                                           fontSize: 10,
                                                         ),
-                                                      )
-                                                    : null,
+                                                      ),
                                               ),
                                               const SizedBox(width: 8),
                                               Text(p.name),

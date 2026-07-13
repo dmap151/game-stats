@@ -173,10 +173,17 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                         child: CircleAvatar(
                           radius: 60,
                           backgroundColor: theme.colorScheme.primaryContainer,
-                          backgroundImage: _currentPlayer.imagePath != null ? FileImage(File(_currentPlayer.imagePath!)) : null,
-                          child: _currentPlayer.imagePath == null 
-                              ? Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)) 
-                              : null,
+                          child: _currentPlayer.imagePath != null 
+                              ? ClipOval(
+                                  child: Image.file(
+                                    File(_currentPlayer.imagePath!),
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 250,
+                                  ),
+                                )
+                              : Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)),
                         ),
                       ),
                     ),
@@ -365,8 +372,17 @@ class _EditPlayerBottomSheetState extends State<_EditPlayerBottomSheet> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
-                  child: _selectedImage == null ? const Icon(Icons.person, size: 50) : null,
+                  child: _selectedImage != null 
+                      ? ClipOval(
+                          child: Image.file(
+                            _selectedImage!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            cacheWidth: 200,
+                          ),
+                        )
+                      : const Icon(Icons.person, size: 50),
                 ),
                 Positioned(
                   bottom: 0,

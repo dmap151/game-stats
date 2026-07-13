@@ -98,10 +98,17 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                       tag: 'player_list_${player.id}',
                       child: CircleAvatar(
                         backgroundColor: theme.colorScheme.primaryContainer,
-                        backgroundImage: player.imagePath != null ? FileImage(File(player.imagePath!)) : null,
-                        child: player.imagePath == null 
-                            ? Text(player.name.substring(0, 1).toUpperCase()) 
-                            : null,
+                        child: player.imagePath != null 
+                            ? ClipOval(
+                                child: Image.file(
+                                  File(player.imagePath!),
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 100,
+                                ),
+                              )
+                            : Text(player.name.substring(0, 1).toUpperCase()),
                       ),
                     ),
                   ),
@@ -207,8 +214,17 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
-                  child: _selectedImage == null ? const Icon(Icons.person, size: 50) : null,
+                  child: _selectedImage != null 
+                      ? ClipOval(
+                          child: Image.file(
+                            _selectedImage!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            cacheWidth: 200,
+                          ),
+                        )
+                      : const Icon(Icons.person, size: 50),
                 ),
                 Positioned(
                   bottom: 0,

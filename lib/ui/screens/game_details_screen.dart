@@ -266,10 +266,17 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                     leading: CircleAvatar(
                                       radius: 16,
                                       backgroundColor: theme.colorScheme.primaryContainer,
-                                      backgroundImage: pInfo?.imagePath != null ? FileImage(File(pInfo!.imagePath!)) : null,
-                                      child: pInfo?.imagePath == null 
-                                        ? Text(ps.playerName?.isNotEmpty == true ? ps.playerName!.substring(0, 1).toUpperCase() : '?') 
-                                        : null,
+                                      child: pInfo?.imagePath != null 
+                                        ? ClipOval(
+                                            child: Image.file(
+                                              File(pInfo!.imagePath!),
+                                              width: 32,
+                                              height: 32,
+                                              fit: BoxFit.cover,
+                                              cacheWidth: 64,
+                                            ),
+                                          )
+                                        : Text(ps.playerName?.isNotEmpty == true ? ps.playerName!.substring(0, 1).toUpperCase() : '?'),
                                     ),
                                     title: Text(ps.playerName ?? 'Unbekannt'),
                                     trailing: Row(
@@ -338,10 +345,17 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                                     tag: 'ranking_player_${pInfo?.id ?? playerId}',
                                     child: CircleAvatar(
                                       backgroundColor: index == 0 ? theme.colorScheme.secondary : theme.colorScheme.primaryContainer,
-                                      backgroundImage: pInfo?.imagePath != null ? FileImage(File(pInfo!.imagePath!)) : null,
-                                      child: pInfo?.imagePath == null 
-                                        ? Text(playerName.substring(0, 1).toUpperCase()) 
-                                        : null,
+                                      child: pInfo?.imagePath != null 
+                                        ? ClipOval(
+                                            child: Image.file(
+                                              File(pInfo!.imagePath!),
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              cacheWidth: 100,
+                                            ),
+                                          )
+                                        : Text(playerName.substring(0, 1).toUpperCase()),
                                     ),
                                   ),
                                 ),
