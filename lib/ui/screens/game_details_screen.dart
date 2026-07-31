@@ -9,6 +9,8 @@ import '../../data/models/player.dart';
 import '../../providers/providers.dart';
 import '../widgets/score_chart.dart';
 import '../widgets/full_screen_image_viewer.dart';
+import '../widgets/match_record_tile.dart';
+import '../widgets/player_ranking_card.dart';
 import 'match_entry_screen.dart';
 
 enum SortMode { dateDesc, dateAsc }
@@ -81,26 +83,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
     );
   }
 
-  Widget _buildImageThumbnail(BuildContext context, String path, String heroTag) {
-    return GestureDetector(
-      onTap: () {
-        FullScreenImageViewer.show(context, File(path), heroTag);
-      },
-      child: Hero(
-        tag: heroTag,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.file(
-            File(path),
-            height: 150,
-            width: 150,
-            fit: BoxFit.cover,
-            cacheWidth: 400,
-          ),
-        ),
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -202,136 +185,13 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                         ),
                         const SizedBox(height: 16),
                         ...sortedRecords.map((r) {
-                          // Find winner
-                          final winner = r.playerScores.where((p) => p.placement == 1).firstOrNull;
-                          return Card(
-                            elevation: 0,
-                            color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                            child: ExpansionTile(
-                              leading: r.imagePath != null
-                                  ? ClipOval(
-                                      child: Image.file(
-                                        File(r.imagePath!),
-                                        width: 40,
-                                        height: 40,
-                                        fit: BoxFit.cover,
-                                        cacheWidth: 100,
-                                      ),
-                                    )
-                                  : const CircleAvatar(
-                                      backgroundColor: Colors.amber,
-                                      child: Icon(Icons.emoji_events, color: Colors.black87, size: 20),
-                                    ),
-                              title: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('${widget.game.name} #${matchIndices[r.id] ?? 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        Text(winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden', style: theme.textTheme.bodySmall),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                      if (value == 'edit') _editMatch(r);
-                                      if (value == 'delete') _deleteMatch(r);
-                                    },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: ListTile(
-                                          leading: Icon(Icons.edit),
-                                          title: Text('Bearbeiten'),
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: ListTile(
-                                          leading: Icon(Icons.delete, color: Colors.red),
-                                          title: Text('Löschen', style: TextStyle(color: Colors.red)),
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              subtitle: Text(
-                                '${DateFormat('dd.MM.yyyy').format(r.date)} - ${r.numberOfPlayers} Spieler',
-                              ),
-                              children: [
-                                if (r.imagePath != null || r.imagePaths.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          if (r.imagePath != null) ...[
-                                            _buildImageThumbnail(context, r.imagePath!, 'match_${r.id}_0'),
-                                            const SizedBox(width: 8),
-                                          ],
-                                          ...r.imagePaths.asMap().entries.map((entry) {
-                                            return Padding(
-                                              padding: const EdgeInsets.only(right: 8.0),
-                                              child: _buildImageThumbnail(context, entry.value, 'match_${r.id}_${entry.key + 1}'),
-                                            );
-                                          }).toList(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ...((r.playerScores.toList()..sort((a, b) => a.placement.compareTo(b.placement))).map((ps) {
-                                  final pInfo = getPlayer(ps.playerId ?? -1);
-                                  return ListTile(
-                                    leading: CircleAvatar(
-                                      radius: 16,
-                                      backgroundColor: theme.colorScheme.primaryContainer,
-                                      child: pInfo?.imagePath != null 
-                                        ? ClipOval(
-                                            child: Image.file(
-                                              File(pInfo!.imagePath!),
-                                              width: 32,
-                                              height: 32,
-                                              fit: BoxFit.cover,
-                                              cacheWidth: 64,
-                                            ),
-                                          )
-                                        : Text(ps.playerName?.isNotEmpty == true ? ps.playerName!.substring(0, 1).toUpperCase() : '?'),
-                                    ),
-                                    title: Text(ps.playerName ?? 'Unbekannt'),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (ps.score != null) ...[
-                                          Text('${ps.score} Punkte', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                          const SizedBox(width: 12),
-                                        ],
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: ps.placement == 1 ? Colors.amber : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: ps.placement == 1 ? null : Border.all(color: theme.colorScheme.outlineVariant),
-                                          ),
-                                          child: Text(
-                                            '#${ps.placement}',
-                                            style: TextStyle(
-                                              color: ps.placement == 1 ? Colors.black87 : theme.colorScheme.onSurfaceVariant,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList()),
-                              ],
-                            ),
+                          return MatchRecordTile(
+                            record: r,
+                            game: widget.game,
+                            matchIndex: matchIndices[r.id] ?? 1,
+                            getPlayer: getPlayer,
+                            onEdit: () => _editMatch(r),
+                            onDelete: () => _deleteMatch(r),
                           );
                         }).toList(),
                       ],
@@ -349,74 +209,14 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                         final matches = playerMatches[playerId] ?? 0;
                         final winRate = (wins / matches) * 100;
 
-                        return Card(
-                          elevation: 0,
-                          color: index == 0 ? theme.colorScheme.primaryContainer.withOpacity(0.3) : theme.colorScheme.surface,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
-                          ),
-                          child: ListTile(
-                            leading: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    if (pInfo?.imagePath != null) {
-                                      FullScreenImageViewer.show(context, File(pInfo!.imagePath!), 'ranking_player_${pInfo.id}');
-                                    }
-                                  },
-                                  child: Hero(
-                                    tag: 'ranking_player_${pInfo?.id ?? playerId}',
-                                    child: CircleAvatar(
-                                      backgroundColor: index == 0 ? Colors.amber : theme.colorScheme.primaryContainer,
-                                      child: pInfo?.imagePath != null 
-                                        ? ClipOval(
-                                            child: Image.file(
-                                              File(pInfo!.imagePath!),
-                                              width: 40,
-                                              height: 40,
-                                              fit: BoxFit.cover,
-                                              cacheWidth: 100,
-                                            ),
-                                          )
-                                        : Text(playerName.substring(0, 1).toUpperCase()),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: -5,
-                                  right: -5,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: index == 0 ? Colors.amber : theme.colorScheme.surface,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: index == 0 ? Colors.amber.shade700 : theme.colorScheme.outlineVariant),
-                                    ),
-                                    child: Text(
-                                      '#${index + 1}',
-                                      style: TextStyle(
-                                        fontSize: 10, 
-                                        fontWeight: FontWeight.bold, 
-                                        color: index == 0 ? Colors.black87 : theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            title: Text(playerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('$matches gespielte Partien'),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('$wins Siege', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
-                                Text('${winRate.toStringAsFixed(1)}% Win Rate', style: theme.textTheme.labelSmall),
-                              ],
-                            ),
-                          ),
+                        return PlayerRankingCard(
+                          playerId: playerId,
+                          playerName: playerName,
+                          playerInfo: pInfo,
+                          wins: wins,
+                          matches: matches,
+                          winRate: winRate,
+                          rank: index + 1,
                         );
                       },
                     ),

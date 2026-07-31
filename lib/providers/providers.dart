@@ -5,20 +5,27 @@ import '../data/models/match_record.dart';
 import '../data/models/player_statistics.dart';
 import '../data/models/player.dart';
 
+/// Provides the singleton instance of [DatabaseService].
+/// Must be overridden in the ProviderScope at the root of the app.
 final databaseProvider = Provider<DatabaseService>((ref) {
   throw UnimplementedError('DatabaseService is not initialized');
 });
 
+/// Streams all match records from the database.
+/// The UI will automatically rebuild when a new match is added or modified.
 final matchRecordsProvider = StreamProvider<List<MatchRecord>>((ref) {
   final db = ref.watch(databaseProvider);
   return db.listenToMatchRecords();
 });
 
+/// Streams all players from the database.
 final playersProvider = StreamProvider<List<Player>>((ref) {
   final db = ref.watch(databaseProvider);
   return db.listenToPlayers();
 });
 
+/// Calculates global statistics for all players based on the [matchRecordsProvider].
+/// This provider recalculates automatically whenever match records change.
 final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {
   final recordsAsync = ref.watch(matchRecordsProvider);
   

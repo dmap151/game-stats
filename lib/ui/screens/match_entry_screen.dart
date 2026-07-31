@@ -11,6 +11,7 @@ import '../../data/models/game.dart';
 import '../../data/models/player.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/full_screen_image_viewer.dart';
+import '../widgets/player_entry_card.dart';
 
 class _PlayerEntryForm {
   int? playerId;
@@ -436,114 +437,16 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                     playerForm.playerId = null;
                   }
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: theme.colorScheme.outlineVariant.withOpacity(
-                          0.5,
-                        ),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: DropdownButtonFormField<int>(
-                                  value: playerForm.playerId,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Spieler auswählen',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  items: players
-                                      .map(
-                                        (p) => DropdownMenuItem(
-                                          value: p.id,
-                                          child: Row(
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 12,
-                                                child: p.imagePath != null
-                                                    ? ClipOval(
-                                                        child: Image.file(
-                                                          File(p.imagePath!),
-                                                          width: 24,
-                                                          height: 24,
-                                                          fit: BoxFit.cover,
-                                                          cacheWidth: 50,
-                                                        ),
-                                                      )
-                                                    : Text(
-                                                        p.name
-                                                            .substring(0, 1)
-                                                            .toUpperCase(),
-                                                        style: const TextStyle(
-                                                          fontSize: 10,
-                                                        ),
-                                                      ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(p.name),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (val) =>
-                                      setState(() => playerForm.playerId = val),
-                                ),
-                              ),
-                              if (_playerEntries.length > 1)
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  color: theme.colorScheme.error,
-                                  onPressed: () => _removePlayerEntry(index),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  initialValue: playerForm.placement.toString(),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Platz',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(
-                                      Icons.emoji_events_outlined,
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (val) => playerForm.placement =
-                                      int.tryParse(val) ?? 1,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: TextFormField(
-                                  initialValue:
-                                      playerForm.score?.toString() ?? '',
-                                  decoration: const InputDecoration(
-                                    labelText: 'Punkte',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.scoreboard_outlined),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (val) => playerForm.score =
-                                      val.isEmpty ? null : int.tryParse(val),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                  return PlayerEntryCard(
+                    playerId: playerForm.playerId,
+                    placement: playerForm.placement,
+                    score: playerForm.score,
+                    players: players,
+                    showRemoveButton: _playerEntries.length > 1,
+                    onRemove: () => _removePlayerEntry(index),
+                    onPlayerChanged: (val) => setState(() => playerForm.playerId = val),
+                    onPlacementChanged: (val) => playerForm.placement = val,
+                    onScoreChanged: (val) => playerForm.score = val,
                   );
                 }),
 

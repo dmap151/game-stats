@@ -1,0 +1,21 @@
+# AI Rules for Game Stats Tracker
+
+## Tech Stack
+- Flutter 3.x
+- Dart 3.x
+- Riverpod (for state management)
+- Isar (for local database)
+
+## Architecture & State Management
+- Use `ConsumerWidget` instead of `StatefulWidget` where possible.
+- UI widgets MUST NOT access `DatabaseService` or Isar instances directly in a stateful way without Riverpod. Use Riverpod providers to watch state.
+- State should be immutable.
+
+## Isar Code Generation
+- Whenever you modify models in `lib/data/models/` (e.g., `Game`, `Player`, `MatchRecord`), you MUST run the code generator:
+  `flutter pub run build_runner build --delete-conflicting-outputs`
+
+## Clean Code & Linting
+- Follow strict linting rules. Do not use `dynamic`. Use proper Dart types.
+- Ensure small, focused files (Single Responsibility Principle). Extract large UI components into `lib/ui/widgets/`.
+- Add Dart docstrings (`///`) to complex business logic, providers, and database methods.

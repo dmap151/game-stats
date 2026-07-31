@@ -8,6 +8,8 @@ import 'models/player.dart';
 class DatabaseService {
   late Isar isar;
 
+  /// Initializes the Isar database and opens the necessary schemas.
+  /// This must be called before any other database operations.
   Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
     isar = await Isar.open(
@@ -18,12 +20,17 @@ class DatabaseService {
 
   // --- Player Methods ---
 
+  /// Saves a new player to the database or updates an existing one if the ID is set.
+  /// Returns the ID of the saved player.
   Future<int> savePlayer(Player player) async {
     return await isar.writeTxn(() async {
       return await isar.players.put(player);
     });
   }
 
+  /// Updates a player's profile (name and image).
+  /// If the name is changed, it intelligently updates the embedded player names
+  /// in all historical `MatchRecord`s to ensure consistency.
   Future<void> updatePlayerProfile(Player player, String newName, String? newImagePath) async {
     await isar.writeTxn(() async {
       final oldName = player.name;
@@ -56,10 +63,13 @@ class DatabaseService {
     });
   }
 
+  /// Retrieves a list of all players currently in the database.
   Future<List<Player>> getAllPlayers() async {
     return await isar.players.where().findAll();
   }
 
+  /// Returns a stream that emits a new list of players whenever the players collection changes.
+  /// Useful for reactive UI updates via Riverpod.
   Stream<List<Player>> listenToPlayers() {
     return isar.players.where().watch(fireImmediately: true);
   }
@@ -88,6 +98,8 @@ class DatabaseService {
 
   // --- MatchRecord Methods ---
 
+  /// Saves a match record to the database and ensures the linked game is saved.
+  /// Returns the ID of the saved match record.
   Future<int> saveMatchRecord(MatchRecord record) async {
     return await isar.writeTxn(() async {
       final id = await isar.matchRecords.put(record);
