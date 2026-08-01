@@ -25,3 +25,4 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
+apply(from = "fix_namespace.gradle")
