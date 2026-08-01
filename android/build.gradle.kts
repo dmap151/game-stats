@@ -5,6 +5,8 @@ allprojects {
     }
 }
 
+apply(from = "fix_namespace.gradle")
+
 
 
 val newBuildDir: Directory =
@@ -24,5 +26,3 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
-
-apply(from = "fix_namespace.gradle")
