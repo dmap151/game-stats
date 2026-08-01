@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.game_stats"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
