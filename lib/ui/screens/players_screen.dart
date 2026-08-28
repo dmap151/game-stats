@@ -9,6 +9,7 @@ import '../../data/models/player.dart';
 import '../../providers/providers.dart';
 import '../widgets/full_screen_image_viewer.dart';
 import 'player_details_screen.dart';
+import 'compare_players_screen.dart';
 
 class PlayersScreen extends ConsumerStatefulWidget {
   const PlayersScreen({super.key});
@@ -32,7 +33,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
   }
 
   void _showAddPlayerDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => _AddPlayerBottomSheet(
@@ -61,6 +62,20 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
         title: const Text('Spieler'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.query_stats),
+            tooltip: 'Spieler vergleichen',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const ComparePlayersScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: playersAsync.when(
         data: (players) {
@@ -84,7 +99,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+                  side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
@@ -117,7 +132,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (context) => PlayerDetailsScreen(player: player),
                       ),
                     );
@@ -140,7 +155,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
 }
 
 class _AddPlayerBottomSheet extends StatefulWidget {
-  final Function(String name, File? imageFile) onSave;
+  final void Function(String name, File? imageFile) onSave;
 
   const _AddPlayerBottomSheet({required this.onSave});
 
@@ -164,7 +179,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
   }
 
   void _showImageSourceDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -215,7 +230,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: _selectedImage != null 
                       ? ClipOval(
                           child: Image.file(
