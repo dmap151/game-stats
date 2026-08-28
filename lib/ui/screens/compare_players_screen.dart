@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,8 @@ import '../../providers/providers.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/head_to_head_provider.dart';
+import 'game_details_screen.dart';
+import '../widgets/match_preview_card.dart';
 
 final comparePlayer1Provider = StateProvider<int?>((ref) => null);
 final comparePlayer2Provider = StateProvider<int?>((ref) => null);
@@ -273,30 +276,29 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
             final p2ScoreOpt = match.playerScores.firstWhereOrNull((s) => s.playerId == p2.id);
             if (p1ScoreOpt == null || p2ScoreOpt == null) return const SizedBox.shrink();
 
-            final dateStr = '${match.date.day.toString().padLeft(2, '0')}.${match.date.month.toString().padLeft(2, '0')}.${match.date.year}';
-            final gameName = match.game.value?.name ?? 'Unbekanntes Spiel';
-
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              child: ListTile(
-                title: Text(gameName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(dateStr),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+            return MatchPreviewCard(
+              match: match,
+              bottomWidget: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '${p1ScoreOpt.placement}. Platz',
                       style: TextStyle(
                         fontWeight: p1ScoreOpt.placement < p2ScoreOpt.placement ? FontWeight.bold : FontWeight.normal,
-                        color: p1ScoreOpt.placement < p2ScoreOpt.placement ? theme.colorScheme.primary : null,
+                        color: p1ScoreOpt.placement < p2ScoreOpt.placement ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const Text(' - '),
+                    Text(
+                      'VS',
+                      style: TextStyle(color: theme.colorScheme.outline, fontWeight: FontWeight.bold),
+                    ),
                     Text(
                       '${p2ScoreOpt.placement}. Platz',
                       style: TextStyle(
                         fontWeight: p2ScoreOpt.placement < p1ScoreOpt.placement ? FontWeight.bold : FontWeight.normal,
-                        color: p2ScoreOpt.placement < p1ScoreOpt.placement ? theme.colorScheme.primary : null,
+                        color: p2ScoreOpt.placement < p1ScoreOpt.placement ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
