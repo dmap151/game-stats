@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 class EditPlayerBottomSheet extends StatefulWidget {
   final String initialName;
   final String? initialImagePath;
-  final Function(String name, File? imageFile) onSave;
+  final void Function(String name, File? imageFile) onSave;
 
   const EditPlayerBottomSheet({
     super.key,
@@ -36,7 +36,12 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
+    final pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -46,7 +51,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
   }
 
   void _showImageSourceDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -97,7 +102,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     child: _selectedImage != null 
                         ? ClipOval(
                             child: Image.file(
@@ -106,6 +111,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
                               height: 100,
                               fit: BoxFit.cover,
                               cacheWidth: 200,
+                              gaplessPlayback: true,
                             ),
                           )
                         : const Icon(Icons.person, size: 50),

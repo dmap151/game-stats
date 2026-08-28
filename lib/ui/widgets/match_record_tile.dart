@@ -25,21 +25,22 @@ class MatchRecordTile extends StatelessWidget {
     required this.onDelete,
   });
 
-  Widget _buildImageThumbnail(BuildContext context, String path, String heroTag) {
+  Widget _buildImageThumbnail(BuildContext context, String path, [String? heroTag]) {
     return GestureDetector(
       onTap: () {
-        FullScreenImageViewer.show(context, File(path), heroTag);
+        FullScreenImageViewer.show(context, File(path));
       },
-      child: Hero(
-        tag: heroTag,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+      child: CircleAvatar(
+        radius: 36,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: ClipOval(
           child: Image.file(
             File(path),
-            height: 150,
-            width: 150,
+            height: 72,
+            width: 72,
             fit: BoxFit.cover,
-            cacheWidth: 400,
+            cacheWidth: 150,
+            gaplessPlayback: true,
           ),
         ),
       ),
@@ -53,7 +54,7 @@ class MatchRecordTile extends StatelessWidget {
     
     return Card(
       elevation: 0,
-      color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       child: ExpansionTile(
         leading: record.imagePath != null
             ? ClipOval(

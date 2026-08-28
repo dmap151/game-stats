@@ -24,6 +24,12 @@ final playersProvider = StreamProvider<List<Player>>((ref) {
   return db.listenToPlayers();
 });
 
+/// Streams all games from the database.
+final gamesProvider = StreamProvider<List<Game>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.listenToGames();
+});
+
 /// Calculates global statistics for all players based on the [matchRecordsProvider].
 /// This provider recalculates automatically whenever match records change.
 final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {

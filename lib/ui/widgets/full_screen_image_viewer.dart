@@ -3,20 +3,17 @@ import 'package:flutter/material.dart';
 
 class FullScreenImageViewer extends StatelessWidget {
   final File imageFile;
-  final String heroTag;
 
   const FullScreenImageViewer({
     super.key,
     required this.imageFile,
-    required this.heroTag,
   });
 
-  static void show(BuildContext context, File imageFile, String heroTag) {
+  static void show(BuildContext context, File imageFile, [String? _]) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => FullScreenImageViewer(
           imageFile: imageFile,
-          heroTag: heroTag,
         ),
       ),
     );
@@ -36,10 +33,7 @@ class FullScreenImageViewer extends StatelessWidget {
           panEnabled: true,
           minScale: 0.5,
           maxScale: 4,
-          child: Hero(
-            tag: heroTag,
-            child: Image.file(imageFile),
-          ),
+          child: Image.file(imageFile),
         ),
       ),
     );

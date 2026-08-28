@@ -386,27 +386,19 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                               FullScreenImageViewer.show(
                                 context,
                                 img,
-                                'match_preview_${img.path}',
                               );
                             },
-                            child: Hero(
-                              tag: 'match_preview_${img.path}',
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: theme.colorScheme.outlineVariant,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    img,
-                                    fit: BoxFit.cover,
-                                    cacheWidth: 200,
-                                  ),
+                            child: CircleAvatar(
+                              radius: 36,
+                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                              child: ClipOval(
+                                child: Image.file(
+                                  img,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 150,
+                                  gaplessPlayback: true,
                                 ),
                               ),
                             ),

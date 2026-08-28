@@ -106,25 +106,23 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   leading: GestureDetector(
                     onTap: () {
                       if (player.imagePath != null) {
-                        FullScreenImageViewer.show(context, File(player.imagePath!), 'player_list_${player.id}');
+                        FullScreenImageViewer.show(context, File(player.imagePath!));
                       }
                     },
-                    child: Hero(
-                      tag: 'player_list_${player.id}',
-                      child: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        child: player.imagePath != null 
-                            ? ClipOval(
-                                child: Image.file(
-                                  File(player.imagePath!),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 100,
-                                ),
-                              )
-                            : Text(player.name.substring(0, 1).toUpperCase()),
-                      ),
+                    child: CircleAvatar(
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      child: player.imagePath != null 
+                          ? ClipOval(
+                              child: Image.file(
+                                File(player.imagePath!),
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                cacheWidth: 100,
+                                gaplessPlayback: true,
+                              ),
+                            )
+                          : Text(player.name.substring(0, 1).toUpperCase()),
                     ),
                   ),
                   title: Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -169,7 +167,12 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
+    final pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -222,7 +225,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Neuer Spieler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text('Neuen Spieler anlegen', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
           Center(
             child: Stack(
@@ -239,6 +242,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
                             height: 100,
                             fit: BoxFit.cover,
                             cacheWidth: 200,
+                            gaplessPlayback: true,
                           ),
                         )
                       : const Icon(Icons.person, size: 50),

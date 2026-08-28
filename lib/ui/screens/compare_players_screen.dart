@@ -313,46 +313,42 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                 FullScreenImageViewer.show(
                   context,
                   File(selectedPlayer!.imagePath!),
-                  'compare_player_${playerNum}_${selectedPlayer.id}',
                 );
               }
             },
-            child: Hero(
-              tag:
-                  'compare_player_${playerNum}_${selectedPlayer?.id ?? playerNum}',
-              child: CircleAvatar(
-                radius: 36,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: selectedPlayer != null
-                    ? (selectedPlayer.imagePath != null
-                          ? ClipOval(
-                              child: Image.file(
-                                File(selectedPlayer.imagePath!),
-                                width: 72,
-                                height: 72,
-                                fit: BoxFit.cover,
-                                cacheWidth: 180,
-                              ),
-                            )
-                          : Text(
-                              selectedPlayer.name.isNotEmpty
-                                  ? selectedPlayer.name
-                                        .substring(0, 1)
-                                        .toUpperCase()
-                                  : '?',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ))
-                    : Icon(
-                        Icons.person_outline,
-                        size: 36,
-                        color: theme.colorScheme.onPrimaryContainer.withValues(
-                          alpha: 0.5,
-                        ),
+            child: CircleAvatar(
+              radius: 36,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: selectedPlayer != null
+                  ? (selectedPlayer.imagePath != null
+                        ? ClipOval(
+                            child: Image.file(
+                              File(selectedPlayer.imagePath!),
+                              width: 72,
+                              height: 72,
+                              fit: BoxFit.cover,
+                              cacheWidth: 180,
+                              gaplessPlayback: true,
+                            ),
+                          )
+                        : Text(
+                            selectedPlayer.name.isNotEmpty
+                                ? selectedPlayer.name
+                                      .substring(0, 1)
+                                      .toUpperCase()
+                                : '?',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ))
+                  : Icon(
+                      Icons.person_outline,
+                      size: 36,
+                      color: theme.colorScheme.onPrimaryContainer.withValues(
+                        alpha: 0.5,
                       ),
-              ),
+                    ),
             ),
           ),
         ],

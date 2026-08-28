@@ -8,4 +8,6 @@ class Game {
 
   @Index(unique: true)
   late String name;
+
+  String? imagePath;
 }

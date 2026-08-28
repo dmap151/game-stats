@@ -100,6 +100,17 @@ class DatabaseService {
     return await isar.games.where().nameEqualTo(name).findFirst();
   }
 
+  Future<void> updateGameImage(Game game, String? newImagePath) async {
+    await isar.writeTxn(() async {
+      game.imagePath = newImagePath;
+      await isar.games.put(game);
+    });
+  }
+
+  Stream<List<Game>> listenToGames() {
+    return isar.games.where().watch(fireImmediately: true);
+  }
+
   // --- MatchRecord Methods ---
 
   /// Saves a match record to the database and ensures the linked game is saved.

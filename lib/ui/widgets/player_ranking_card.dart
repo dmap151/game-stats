@@ -30,10 +30,10 @@ class PlayerRankingCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: isFirst ? theme.colorScheme.primaryContainer.withOpacity(0.3) : theme.colorScheme.surface,
+      color: isFirst ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: ListTile(
         leading: Stack(
@@ -42,25 +42,23 @@ class PlayerRankingCard extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 if (playerInfo?.imagePath != null) {
-                  FullScreenImageViewer.show(context, File(playerInfo!.imagePath!), 'ranking_player_${playerInfo!.id}');
+                  FullScreenImageViewer.show(context, File(playerInfo!.imagePath!));
                 }
               },
-              child: Hero(
-                tag: 'ranking_player_${playerInfo?.id ?? playerId}',
-                child: CircleAvatar(
-                  backgroundColor: isFirst ? Colors.amber : theme.colorScheme.primaryContainer,
-                  child: playerInfo?.imagePath != null 
-                    ? ClipOval(
-                        child: Image.file(
-                          File(playerInfo!.imagePath!),
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          cacheWidth: 100,
-                        ),
-                      )
-                    : Text(playerName.substring(0, 1).toUpperCase()),
-                ),
+              child: CircleAvatar(
+                backgroundColor: isFirst ? Colors.amber : theme.colorScheme.primaryContainer,
+                child: playerInfo?.imagePath != null 
+                  ? ClipOval(
+                      child: Image.file(
+                        File(playerInfo!.imagePath!),
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        cacheWidth: 100,
+                        gaplessPlayback: true,
+                      ),
+                    )
+                  : Text(playerName.substring(0, 1).toUpperCase()),
               ),
             ),
             Positioned(

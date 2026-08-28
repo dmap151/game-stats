@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:intl/intl.dart';
@@ -46,7 +45,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
   }
 
   void _editProfile() async {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => EditPlayerBottomSheet(
@@ -166,26 +165,24 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                     GestureDetector(
                       onTap: () {
                         if (_currentPlayer.imagePath != null) {
-                          FullScreenImageViewer.show(context, File(_currentPlayer.imagePath!), 'player_detail_${_currentPlayer.id}');
+                          FullScreenImageViewer.show(context, File(_currentPlayer.imagePath!));
                         }
                       },
-                      child: Hero(
-                        tag: 'player_detail_${_currentPlayer.id}',
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundColor: theme.colorScheme.primaryContainer,
-                          child: _currentPlayer.imagePath != null 
-                              ? ClipOval(
-                                  child: Image.file(
-                                    File(_currentPlayer.imagePath!),
-                                    width: 120,
-                                    height: 120,
-                                    fit: BoxFit.cover,
-                                    cacheWidth: 250,
-                                  ),
-                                )
-                              : Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)),
-                        ),
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        child: _currentPlayer.imagePath != null 
+                            ? ClipOval(
+                                child: Image.file(
+                                  File(_currentPlayer.imagePath!),
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 250,
+                                  gaplessPlayback: true,
+                                ),
+                              )
+                            : Text(_currentPlayer.name.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 48)),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -223,7 +220,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                 
                 return Card(
                   elevation: 0,
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: score.placement == 1 
@@ -244,7 +241,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                       if (match.game.value != null) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (context) => GameDetailsScreen(game: match.game.value!),
                           ),
                         );
