@@ -105,7 +105,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   }
 
   void _showImageSourceDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -162,10 +162,10 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
   void _saveMatch(List<Player> availablePlayers) async {
     if (_formKey.currentState!.validate()) {
-      if (_playerEntries.any((p) => p.playerId == null)) {
+      if (_playerEntries.any((p) => (p.playerName == null || p.playerName!.trim().isEmpty))) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Bitte für jeden Eintrag einen Spieler auswählen.'),
+            content: Text('Bitte für jeden Eintrag einen Spielernamen eingeben.'),
           ),
         );
         return;
@@ -196,14 +196,23 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         await db.saveGame(game);
       }
 
-      final scores = _playerEntries.map((e) {
-        final player = availablePlayers.firstWhere((p) => p.id == e.playerId);
-        return PlayerScore()
-          ..playerId = player.id
-          ..playerName = player.name
-          ..placement = e.placement
-          ..score = e.score;
-      }).toList();
+      final scores = <PlayerScore>[];
+      for (var e in _playerEntries) {
+        final pName = e.playerName!.trim();
+        var player = await db.getPlayerByName(pName);
+        if (player == null) {
+          player = Player()..name = pName;
+          final id = await db.savePlayer(player);
+          player.id = id;
+        }
+        scores.add(
+          PlayerScore()
+            ..playerId = player.id
+            ..playerName = player.name
+            ..placement = e.placement
+            ..score = e.score
+        );
+      }
 
       final match = widget.existingMatch ?? MatchRecord();
       match.game.value = game;
@@ -428,23 +437,14 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                   final index = entry.key;
                   final playerForm = entry.value;
 
-                  // Ensure the pre-selected playerId actually exists in the current players list
-                  // If a player was deleted, we might need to handle this gracefully
-                  final isValidId = players.any(
-                    (p) => p.id == playerForm.playerId,
-                  );
-                  if (!isValidId && playerForm.playerId != null) {
-                    playerForm.playerId = null;
-                  }
-
                   return PlayerEntryCard(
-                    playerId: playerForm.playerId,
+                    playerName: playerForm.playerName ?? '',
                     placement: playerForm.placement,
                     score: playerForm.score,
                     players: players,
                     showRemoveButton: _playerEntries.length > 1,
                     onRemove: () => _removePlayerEntry(index),
-                    onPlayerChanged: (val) => setState(() => playerForm.playerId = val),
+                    onPlayerNameChanged: (val) => playerForm.playerName = val,
                     onPlacementChanged: (val) => playerForm.placement = val,
                     onScoreChanged: (val) => playerForm.score = val,
                   );

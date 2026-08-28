@@ -1,27 +1,26 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/models/player.dart';
 
 class PlayerEntryCard extends StatelessWidget {
-  final int? playerId;
+  final String playerName;
   final int placement;
   final int? score;
   final List<Player> players;
   final bool showRemoveButton;
   final VoidCallback onRemove;
-  final ValueChanged<int?> onPlayerChanged;
+  final ValueChanged<String> onPlayerNameChanged;
   final ValueChanged<int> onPlacementChanged;
   final ValueChanged<int?> onScoreChanged;
 
   const PlayerEntryCard({
     super.key,
-    required this.playerId,
+    required this.playerName,
     required this.placement,
     this.score,
     required this.players,
     required this.showRemoveButton,
     required this.onRemove,
-    required this.onPlayerChanged,
+    required this.onPlayerNameChanged,
     required this.onPlacementChanged,
     required this.onScoreChanged,
   });
@@ -35,7 +34,7 @@ class PlayerEntryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: Padding(
@@ -45,41 +44,31 @@ class PlayerEntryCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: playerId,
-                    decoration: const InputDecoration(
-                      labelText: 'Spieler auswählen',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: players.map((p) {
-                      return DropdownMenuItem(
-                        value: p.id,
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 12,
-                              child: p.imagePath != null
-                                  ? ClipOval(
-                                      child: Image.file(
-                                        File(p.imagePath!),
-                                        width: 24,
-                                        height: 24,
-                                        fit: BoxFit.cover,
-                                        cacheWidth: 50,
-                                      ),
-                                    )
-                                  : Text(
-                                      p.name.substring(0, 1).toUpperCase(),
-                                      style: const TextStyle(fontSize: 10),
-                                    ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(p.name),
-                          ],
+                  child: Autocomplete<String>(
+                    initialValue: TextEditingValue(text: playerName),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return players.map((p) => p.name).toList();
+                      }
+                      return players.map((p) => p.name).where((String option) {
+                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      }).toList();
+                    },
+                    onSelected: (String selection) {
+                      onPlayerNameChanged(selection);
+                    },
+                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Spieler auswählen',
+                          border: OutlineInputBorder(),
                         ),
+                        onChanged: onPlayerNameChanged,
+                        onFieldSubmitted: (_) => onFieldSubmitted(),
                       );
-                    }).toList(),
-                    onChanged: onPlayerChanged,
+                    },
                   ),
                 ),
                 if (showRemoveButton)
@@ -126,3 +115,4 @@ class PlayerEntryCard extends StatelessWidget {
     );
   }
 }
+

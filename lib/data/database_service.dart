@@ -73,6 +73,10 @@ class DatabaseService {
   Stream<List<Player>> listenToPlayers() {
     return isar.players.where().watch(fireImmediately: true);
   }
+
+  Future<Player?> getPlayerByName(String name) async {
+    return await isar.players.where().nameEqualTo(name).findFirst();
+  }
   
   Future<bool> deletePlayer(int id) async {
     return await isar.writeTxn(() async {
