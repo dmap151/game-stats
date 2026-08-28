@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/models/player.dart';
 
@@ -53,6 +54,65 @@ class PlayerEntryCard extends StatelessWidget {
                       return players.map((p) => p.name).where((String option) {
                         return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
                       }).toList();
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 250),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(index);
+                                final player = players.firstWhere((p) => p.name == option);
+                                return InkWell(
+                                  onTap: () => onSelected(option),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: theme.colorScheme.primaryContainer,
+                                          child: player.imagePath != null
+                                            ? ClipOval(
+                                                child: Image.file(
+                                                  File(player.imagePath!),
+                                                  width: 32,
+                                                  height: 32,
+                                                  fit: BoxFit.cover,
+                                                  cacheWidth: 100, // Fast loading
+                                                ),
+                                              )
+                                            : Text(
+                                                player.name.substring(0, 1).toUpperCase(),
+                                                style: const TextStyle(fontSize: 12),
+                                              ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            option,
+                                            style: theme.textTheme.bodyLarge,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
                     },
                     onSelected: (String selection) {
                       onPlayerNameChanged(selection);
