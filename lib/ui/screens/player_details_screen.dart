@@ -45,7 +45,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
   }
 
   void _editProfile() async {
-    showModalBottomSheet<void>(
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => EditPlayerBottomSheet(
@@ -65,7 +65,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
               _currentPlayer.imagePath = newImagePath;
             });
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(this.context).showSnackBar(
                 const SnackBar(content: Text('Profil erfolgreich aktualisiert!')),
               );
             }
@@ -199,9 +199,9 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatColumn(context, label: 'Partien', value: playerMatches.length.toString()),
-                  _StatColumn(context, label: 'Siege', value: wins.toString()),
-                  _StatColumn(context, label: 'Win Rate', value: '${winRate.toStringAsFixed(1)}%'),
+                  _buildStatColumn(context, label: 'Partien', value: playerMatches.length.toString()),
+                  _buildStatColumn(context, label: 'Siege', value: wins.toString()),
+                  _buildStatColumn(context, label: 'Win Rate', value: '${winRate.toStringAsFixed(1)}%'),
                 ],
               ),
               const SizedBox(height: 32),
@@ -249,17 +249,17 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                     },
                   ),
                 );
-              }).toList(),
+              }),
             ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Fehler beim Laden der Statistiken.')),
+        error: (_, _) => const Center(child: Text('Fehler beim Laden der Statistiken.')),
       ),
     );
   }
 
-  Widget _StatColumn(BuildContext context, {required String label, required String value}) {
+  Widget _buildStatColumn(BuildContext context, {required String label, required String value}) {
     final theme = Theme.of(context);
     return Column(
       children: [

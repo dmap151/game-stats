@@ -42,7 +42,7 @@ final headToHeadStatsProvider = Provider.family<HeadToHeadStats, PlayerPair>((re
       int p2TotalPlacement = 0;
       int p1Wins = 0;
       int p2Wins = 0;
-      List<MatchRecord> sharedMatches = [];
+      final List<MatchRecord> sharedMatches = [];
 
       for (var record in records) {
         final scores = record.playerScores;
@@ -62,8 +62,12 @@ final headToHeadStatsProvider = Provider.family<HeadToHeadStats, PlayerPair>((re
             ties++;
           }
 
-          if (p1ScoreOpt.placement == 1) p1Wins++;
-          if (p2ScoreOpt.placement == 1) p2Wins++;
+          if (p1ScoreOpt.placement == 1) {
+            p1Wins++;
+          }
+          if (p2ScoreOpt.placement == 1) {
+            p2Wins++;
+          }
           
           sharedMatches.add(record);
         }
@@ -92,7 +96,7 @@ final headToHeadStatsProvider = Provider.family<HeadToHeadStats, PlayerPair>((re
       player2Wins: 0,
       sharedMatches: [],
     ),
-    error: (_, __) => HeadToHeadStats(
+    error: (_, _) => HeadToHeadStats(
       player1BetterCount: 0,
       player2BetterCount: 0,
       ties: 0,

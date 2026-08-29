@@ -20,15 +20,14 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = color ?? theme.colorScheme.primaryContainer;
-    final onCardColor = color != null ? Colors.white : theme.colorScheme.onPrimaryContainer;
 
     return Card(
       elevation: 0,
-      color: cardColor.withOpacity(0.1),
+      color: cardColor.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: cardColor.withOpacity(0.3),
+          color: cardColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),

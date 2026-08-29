@@ -146,7 +146,7 @@ class GameLibraryScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
+        error: (_, _) =>
             const Center(child: Text('Fehler beim Laden der Bibliothek')),
       ),
     );

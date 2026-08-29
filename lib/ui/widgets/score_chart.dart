@@ -45,7 +45,7 @@ class ScoreChart extends StatelessWidget {
               horizontalInterval: 10,
               getDrawingHorizontalLine: (value) {
                 return FlLine(
-                  color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                   strokeWidth: 1,
                 );
               },
@@ -107,7 +107,7 @@ class ScoreChart extends StatelessWidget {
                 dotData: const FlDotData(show: true),
                 belowBarData: BarAreaData(
                   show: true,
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.2),
+                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
                 ),
               ),
             ],

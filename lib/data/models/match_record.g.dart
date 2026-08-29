@@ -7,7 +7,7 @@ part of 'match_record.dart';
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types, experimental_member_use, experimental_member_use_from_same_package
 
 extension GetMatchRecordCollection on Isar {
   IsarCollection<MatchRecord> get matchRecords => this.collection();
@@ -32,13 +32,23 @@ const MatchRecordSchema = CollectionSchema(
       name: r'imagePaths',
       type: IsarType.stringList,
     ),
-    r'numberOfPlayers': PropertySchema(
+    r'latitude': PropertySchema(
       id: 3,
+      name: r'latitude',
+      type: IsarType.double,
+    ),
+    r'longitude': PropertySchema(
+      id: 4,
+      name: r'longitude',
+      type: IsarType.double,
+    ),
+    r'numberOfPlayers': PropertySchema(
+      id: 5,
       name: r'numberOfPlayers',
       type: IsarType.long,
     ),
     r'playerScores': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'playerScores',
       type: IsarType.objectList,
       target: r'PlayerScore',
@@ -104,9 +114,11 @@ void _matchRecordSerialize(
   writer.writeDateTime(offsets[0], object.date);
   writer.writeString(offsets[1], object.imagePath);
   writer.writeStringList(offsets[2], object.imagePaths);
-  writer.writeLong(offsets[3], object.numberOfPlayers);
+  writer.writeDouble(offsets[3], object.latitude);
+  writer.writeDouble(offsets[4], object.longitude);
+  writer.writeLong(offsets[5], object.numberOfPlayers);
   writer.writeObjectList<PlayerScore>(
-    offsets[4],
+    offsets[6],
     allOffsets,
     PlayerScoreSchema.serialize,
     object.playerScores,
@@ -124,9 +136,11 @@ MatchRecord _matchRecordDeserialize(
   object.id = id;
   object.imagePath = reader.readStringOrNull(offsets[1]);
   object.imagePaths = reader.readStringList(offsets[2]) ?? [];
-  object.numberOfPlayers = reader.readLong(offsets[3]);
+  object.latitude = reader.readDoubleOrNull(offsets[3]);
+  object.longitude = reader.readDoubleOrNull(offsets[4]);
+  object.numberOfPlayers = reader.readLong(offsets[5]);
   object.playerScores = reader.readObjectList<PlayerScore>(
-        offsets[4],
+        offsets[6],
         PlayerScoreSchema.deserialize,
         allOffsets,
         PlayerScore(),
@@ -149,8 +163,12 @@ P _matchRecordDeserializeProp<P>(
     case 2:
       return (reader.readStringList(offset) ?? []) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 4:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readObjectList<PlayerScore>(
             offset,
             PlayerScoreSchema.deserialize,
@@ -743,6 +761,172 @@ extension MatchRecordQueryFilter
   }
 
   QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      latitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'latitude',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      latitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'latitude',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition> latitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'latitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      latitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'latitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      latitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'latitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition> latitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'latitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'longitude',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'longitude',
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'longitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'longitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'longitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
+      longitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'longitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterFilterCondition>
       numberOfPlayersEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -940,6 +1124,30 @@ extension MatchRecordQuerySortBy
     });
   }
 
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> sortByLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'latitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> sortByLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'latitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> sortByLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'longitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> sortByLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'longitude', Sort.desc);
+    });
+  }
+
   QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> sortByNumberOfPlayers() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfPlayers', Sort.asc);
@@ -992,6 +1200,30 @@ extension MatchRecordQuerySortThenBy
     });
   }
 
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> thenByLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'latitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> thenByLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'latitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> thenByLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'longitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> thenByLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'longitude', Sort.desc);
+    });
+  }
+
   QueryBuilder<MatchRecord, MatchRecord, QAfterSortBy> thenByNumberOfPlayers() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfPlayers', Sort.asc);
@@ -1027,6 +1259,18 @@ extension MatchRecordQueryWhereDistinct
     });
   }
 
+  QueryBuilder<MatchRecord, MatchRecord, QDistinct> distinctByLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'latitude');
+    });
+  }
+
+  QueryBuilder<MatchRecord, MatchRecord, QDistinct> distinctByLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'longitude');
+    });
+  }
+
   QueryBuilder<MatchRecord, MatchRecord, QDistinct>
       distinctByNumberOfPlayers() {
     return QueryBuilder.apply(this, (query) {
@@ -1059,6 +1303,18 @@ extension MatchRecordQueryProperty
       imagePathsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imagePaths');
+    });
+  }
+
+  QueryBuilder<MatchRecord, double?, QQueryOperations> latitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'latitude');
+    });
+  }
+
+  QueryBuilder<MatchRecord, double?, QQueryOperations> longitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'longitude');
     });
   }
 

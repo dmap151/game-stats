@@ -92,18 +92,16 @@ class AppTheme {
         onError: onError,
         errorContainer: errorContainer,
         onErrorContainer: onErrorContainer,
-        background: background,
-        onBackground: onBackground,
         surface: surface,
         onSurface: onSurface,
-        surfaceVariant: surfaceVariant,
+        surfaceContainerHighest: surfaceVariant,
         onSurfaceVariant: onSurfaceVariant,
         outline: outline,
         outlineVariant: outlineVariant,
       ),
       textTheme: textTheme,
       useMaterial3: true,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: surface,
     );
   }
 }

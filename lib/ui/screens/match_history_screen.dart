@@ -62,7 +62,7 @@ class MatchHistoryScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Fehler beim Laden der Historie')),
+        error: (_, _) => const Center(child: Text('Fehler beim Laden der Historie')),
       ),
     );
   }

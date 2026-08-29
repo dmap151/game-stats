@@ -7,7 +7,6 @@ import '../../providers/providers.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/head_to_head_provider.dart';
-import 'game_details_screen.dart';
 import '../widgets/match_preview_card.dart';
 import '../widgets/full_screen_image_viewer.dart';
 
@@ -41,10 +40,12 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
       // Only load from prefs if our memory state is currently empty
       if (ref.read(comparePlayer1Provider) == null &&
           ref.read(comparePlayer2Provider) == null) {
-        if (p1Id != null)
+        if (p1Id != null) {
           ref.read(comparePlayer1Provider.notifier).state = p1Id;
-        if (p2Id != null)
+        }
+        if (p2Id != null) {
           ref.read(comparePlayer2Provider.notifier).state = p2Id;
+        }
       }
     } catch (e) {
       debugPrint('SharedPreferences error: $e');
@@ -128,7 +129,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
+        error: (_, _) =>
             const Center(child: Text('Fehler beim Laden der Spieler')),
         ),
       ),
@@ -489,8 +490,9 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
             final p2ScoreOpt = match.playerScores.firstWhereOrNull(
               (s) => s.playerId == p2.id,
             );
-            if (p1ScoreOpt == null || p2ScoreOpt == null)
+            if (p1ScoreOpt == null || p2ScoreOpt == null) {
               return const SizedBox.shrink();
+            }
 
             return MatchPreviewCard(
               match: match,
@@ -554,11 +556,11 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
     FontWeight fw2 = FontWeight.normal;
 
     if (!isShared) {
-      double v1 = double.tryParse(val1) ?? 0;
-      double v2 = double.tryParse(val2) ?? 0;
+      final v1 = double.tryParse(val1) ?? 0;
+      final v2 = double.tryParse(val2) ?? 0;
 
-      bool v1Better = invertGoodness ? v1 < v2 : v1 > v2;
-      bool v2Better = invertGoodness ? v2 < v1 : v2 > v1;
+      final v1Better = invertGoodness ? v1 < v2 : v1 > v2;
+      final v2Better = invertGoodness ? v2 < v1 : v2 > v1;
 
       if (v1Better) {
         color1 = theme.colorScheme.primary;

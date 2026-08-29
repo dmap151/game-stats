@@ -6,6 +6,7 @@ import '../../data/models/match_record.dart';
 import '../../data/models/game.dart';
 import '../../data/models/player.dart';
 import 'full_screen_image_viewer.dart';
+import 'location_badge.dart';
 
 class MatchRecordTile extends StatelessWidget {
   final MatchRecord record;
@@ -107,10 +108,35 @@ class MatchRecordTile extends StatelessWidget {
             ),
           ],
         ),
-        subtitle: Text(
-          '${DateFormat('dd.MM.yyyy').format(record.date)} - ${record.numberOfPlayers} Spieler',
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${DateFormat('dd.MM.yyyy').format(record.date)} - ${record.numberOfPlayers} Spieler',
+            ),
+            if (record.latitude != null && record.longitude != null) ...[
+              const SizedBox(height: 2),
+              LocationBadge(
+                latitude: record.latitude!,
+                longitude: record.longitude!,
+                compact: true,
+              ),
+            ],
+          ],
         ),
         children: [
+          if (record.latitude != null && record.longitude != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: LocationBadge(
+                  latitude: record.latitude!,
+                  longitude: record.longitude!,
+                ),
+              ),
+            ),
           if (record.imagePath != null || record.imagePaths.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -127,7 +153,7 @@ class MatchRecordTile extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 8.0),
                         child: _buildImageThumbnail(context, entry.value, 'match_${record.id}_${entry.key + 1}'),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),

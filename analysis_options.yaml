@@ -1,6 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude:
+    - "**/*.g.dart"
   language:
     strict-casts: true
     strict-inference: true
@@ -8,6 +10,7 @@ analyzer:
   errors:
     missing_required_param: error
     missing_return: error
+    experimental_member_use: ignore
 
 linter:
   rules:

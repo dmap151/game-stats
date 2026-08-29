@@ -141,7 +141,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Fehler beim Laden der Spieler')),
+        error: (_, _) => const Center(child: Text('Fehler beim Laden der Spieler')),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddPlayerDialog,

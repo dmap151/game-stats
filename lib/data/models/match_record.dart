@@ -25,4 +25,6 @@ class MatchRecord {
   
   List<PlayerScore> playerScores = [];
 
+  double? latitude;
+  double? longitude;
 }

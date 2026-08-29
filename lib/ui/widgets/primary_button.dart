@@ -14,8 +14,6 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     if (icon != null) {
       return FilledButton.icon(
         onPressed: onPressed,

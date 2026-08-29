@@ -55,7 +55,7 @@ final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {
       final gamesMap = <int, Game>{};
 
       for (var record in records) {
-        bool hasWinner = record.playerScores.any((score) => score.placement == 1);
+        final bool hasWinner = record.playerScores.any((score) => score.placement == 1);
         if (hasWinner) {
           totalWins++;
         }
@@ -86,7 +86,7 @@ final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {
       globalWinRate: 0.0,
       mostPlayedGame: null,
     ),
-    error: (_, __) => PlayerStatistics(
+    error: (_, _) => PlayerStatistics(
       totalMatchesPlayed: 0,
       totalWins: 0,
       globalWinRate: 0.0,

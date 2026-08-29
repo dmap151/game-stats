@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../data/models/match_record.dart';
 import '../screens/game_details_screen.dart';
 import 'package:collection/collection.dart';
+import 'location_badge.dart';
 
 class MatchPreviewCard extends StatelessWidget {
   final MatchRecord match;
@@ -49,7 +50,21 @@ class MatchPreviewCard extends StatelessWidget {
                     child: const Icon(Icons.history),
                   ),
             title: Text(gameName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(subtitleText),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(subtitleText),
+                if (match.latitude != null && match.longitude != null) ...[
+                  const SizedBox(height: 2),
+                  LocationBadge(
+                    latitude: match.latitude!,
+                    longitude: match.longitude!,
+                    compact: true,
+                  ),
+                ],
+              ],
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               if (match.game.value != null) {

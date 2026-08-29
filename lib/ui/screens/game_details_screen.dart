@@ -216,7 +216,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
         appBar: AppBar(title: Text(widget.game.name)),
         body: const Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => Scaffold(
+      error: (_, _) => Scaffold(
         appBar: AppBar(title: Text(widget.game.name)),
         body: const Center(child: Text('Fehler beim Laden')),
       ),
@@ -340,7 +340,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Fehler beim Laden der Spieler')),
+      error: (_, _) => const Center(child: Text('Fehler beim Laden der Spieler')),
     );
   }
 }

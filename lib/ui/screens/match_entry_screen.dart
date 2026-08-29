@@ -9,6 +9,7 @@ import '../../providers/providers.dart';
 import '../../data/models/match_record.dart';
 import '../../data/models/game.dart';
 import '../../data/models/player.dart';
+import '../../services/location_service.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/full_screen_image_viewer.dart';
 import '../widgets/player_entry_card.dart';
@@ -33,7 +34,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _gameNameController = TextEditingController();
   DateTime _date = DateTime.now();
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
 
   final List<_PlayerEntryForm> _playerEntries = [];
 
@@ -171,13 +172,14 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         return;
       }
 
-      List<String> finalImagePaths = [];
+      final List<String> finalImagePaths = [];
       for (var img in _selectedImages) {
         bool isExisting = false;
         if (widget.existingMatch != null) {
           if (widget.existingMatch!.imagePath == img.path) isExisting = true;
-          if (widget.existingMatch!.imagePaths.contains(img.path))
+          if (widget.existingMatch!.imagePaths.contains(img.path)) {
             isExisting = true;
+          }
         }
         if (isExisting) {
           finalImagePaths.add(img.path);
@@ -225,6 +227,15 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           ? finalImagePaths.skip(1).toList()
           : [];
       match.playerScores = scores;
+
+      // Automatically and silently get GPS location when saving a match
+      if (widget.existingMatch == null || (match.latitude == null && match.longitude == null)) {
+        final position = await LocationService.getCurrentLocation();
+        if (position != null) {
+          match.latitude = position.latitude;
+          match.longitude = position.longitude;
+        }
+      }
 
       await db.saveMatchRecord(match);
 
@@ -333,7 +344,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.calendar_today),
-                  title: Text('Datum der Partie'),
+                  title: const Text('Datum der Partie'),
                   subtitle: Text('${_date.day}.${_date.month}.${_date.year}'),
                   onTap: () async {
                     final picked = await showDatePicker(
@@ -460,7 +471,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
+        error: (_, _) =>
             const Center(child: Text('Fehler beim Laden der Spieler')),
       ),
       ),
