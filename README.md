@@ -4,24 +4,26 @@ Eine moderne und übersichtliche Flutter-App für Brettspieler, um Partien, Punk
 
 ## 🚀 Features
 
-* **Spiele-Bibliothek:** Übersicht über alle gespielten Brettspiele inklusive Gesamtzahl der gespielten Partien.
-* **Match-Historie:** Chronologischer Verlauf jeder gespielten Partie mit Datum, Platzierungen, Punkten und Siegern.
-* **Erinnerungsfotos:** Füge optional jeder Partie ein Bild als Erinnerung (direkt per Kamera oder aus der Galerie) hinzu. Das Bild wird in der Historie beim Aufklappen der Partie angezeigt.
-* **Spieler-Verwaltung:** Lege Profile für deine Mitspieler an – inklusive persönlicher Profilbilder!
-* **Detaillierte Statistiken:** 
-  * Globale Win-Rate für jeden Spieler.
-  * Anzahl der insgesamt gespielten Partien.
-  * Eigener Reiter für Spieler-Rankings (Welcher Spieler gewinnt am häufigsten bei welchem Spiel?).
-* **Charts:** Visuelle Darstellung des Punkteverlaufs (Höchstpunktzahlen) in jedem Spiel über die Zeit.
-* **Volle Kontrolle:** Partien und Spieler-Profile lassen sich jederzeit nachträglich bearbeiten (Name, Foto) oder löschen. Historische Daten werden beim Umbenennen von Spielern intelligent aktualisiert.
+* **Spiele-Bibliothek:** Übersicht über alle gespielten Brettspiele inklusive Gesamtzahl der gespielten Partien und anpassbaren Spiel-Covern.
+* **Match-Historie & GPS-Standorte:** Chronologischer Verlauf jeder Partie inklusive Datum, Platzierungen, Punkten, Siegern und automatischem GPS-Standort (mit Direktlink zu Google Maps / Karten-App).
+* **Spieler-Vergleich (Head-to-Head):** Vergleiche zwei beliebige Spieler direkt miteinander (Direkte Duelle, Siegquoten, durchschnittliche Platzierungen, gemeinsame Partien).
+* **Erinnerungsfotos:** Füge optional jeder Partie Fotos als Erinnerung hinzu.
+* **Spieler-Verwaltung:** Profile für Mitspieler mit runden Profilbildern und detaillierten Einzelstatistiken.
+* **Charts:** Visuelle Darstellung des Punkteverlaufs in jedem Spiel über die Zeit.
+
+## 📚 Entwickler- & KI-Dokumentation
+
+* 🏗️ [Architektur & Datenfluss](docs/ARCHITECTURE.md)
+* 🗄️ [Datenbankschema (Isar)](docs/DATABASE_SCHEMA.md)
+* 🛠️ [Entwicklungs- & Test-Workflows](docs/DEVELOPMENT.md)
+* 🤖 [KI-Regelwerk (AGENTS.md)](AGENTS.md)
 
 ## 🛠️ Technologie-Stack
 
-* **Framework:** [Flutter](https://flutter.dev/) (Dart)
+* **Framework:** [Flutter](https://flutter.dev/) (Dart 3, Null-Safe)
 * **Lokale Datenbank:** [Isar Database](https://isar.dev/) für rasend schnelles Speichern und Abfragen lokaler Daten.
-* **State Management:** [Riverpod](https://riverpod.dev/) für sicheres und sauberes Zustandsmanagement.
-* **Diagramme:** `fl_chart` für die Visualisierung der Punkteverläufe.
-* **Design:** Clean, modern, "Card-based" mit leichten Glassmorphism-Akzenten. Optimiert auf Lesbarkeit.
+* **State Management:** [Riverpod 2](https://riverpod.dev/) für sicheres und sauberes Zustandsmanagement.
+* **Hardware & Plugins:** `geolocator`, `geocoding`, `url_launcher`, `image_picker`, `fl_chart`.
 
 ## 📦 Installation & Kompilierung
 
