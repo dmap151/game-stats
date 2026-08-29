@@ -1,21 +1,28 @@
-# AI Rules for Game Stats Tracker
+# AI Rules for Game Stats Tracker (Cursor & Coding Assistants)
 
 ## Tech Stack
-- Flutter 3.x
-- Dart 3.x
-- Riverpod (for state management)
-- Isar (for local database)
+- Flutter 3.x / Dart 3.x (Null-Safety)
+- flutter_riverpod 2.x (State management)
+- isar 3.1.0+1 (Fast local embedded NoSQL database)
+- Material 3 Design System
 
 ## Architecture & State Management
-- Use `ConsumerWidget` instead of `StatefulWidget` where possible.
-- UI widgets MUST NOT access `DatabaseService` or Isar instances directly in a stateful way without Riverpod. Use Riverpod providers to watch state.
-- State should be immutable.
+- Use `ConsumerWidget` or `ConsumerStatefulWidget` for UI components.
+- Do NOT call `DatabaseService` methods inside `build()` directly without Riverpod.
+- Always access mutations via `ref.read(databaseProvider)` and observe streams via `ref.watch(matchRecordsProvider)`.
+- Explicitly type all dialogs/routes: `showModalBottomSheet<void>(...)`, `MaterialPageRoute<void>(...)`.
+
+## UI & Styling Guidelines
+- **Round Avatars**: All avatars and game thumbnails must be circular (`CircleAvatar` + `ClipOval(child: Image.file(...))`).
+- **No Hero Animations**: Do not wrap thumbnails in `Hero` widgets.
+- **Image Performance**: Always set `cacheWidth: 100-200` and `gaplessPlayback: true` on `Image.file(...)`.
+- **Material 3 Tokens**:
+  - Never use `.withOpacity()`; always use `.withValues(alpha: 0.x)`.
+  - Use `theme.colorScheme.surfaceContainerHighest` and `theme.colorScheme.surface`.
 
 ## Isar Code Generation
-- Whenever you modify models in `lib/data/models/` (e.g., `Game`, `Player`, `MatchRecord`), you MUST run the code generator:
-  `flutter pub run build_runner build --delete-conflicting-outputs`
+- When modifying models in `lib/data/models/`:
+  Run: `flutter pub run build_runner build --delete-conflicting-outputs`
 
-## Clean Code & Linting
-- Follow strict linting rules. Do not use `dynamic`. Use proper Dart types.
-- Ensure small, focused files (Single Responsibility Principle). Extract large UI components into `lib/ui/widgets/`.
-- Add Dart docstrings (`///`) to complex business logic, providers, and database methods.
+## Quality Checks
+- Before finishing any task, run `flutter analyze` and `flutter test` to ensure 0 errors.
