@@ -1,10 +1,12 @@
 version: '3'
 
 vars:
-  DEVICE_ID: '{{.DEVICE_ID | default "00008140-00113510343A801C"}}'
+  DEVICE_ID_FILE:
+    sh: cat DEVICE_ID 2>/dev/null || true
+  DEVICE_ID: '{{.DEVICE_ID | default .DEVICE_ID_FILE | default "00008140-00113510343A801C"}}'
 
 tasks:
   ios:
-    desc: Build and install the release build on an iOS device (override with DEVICE_ID=<udid>)
+    desc: Build and install the release build on an iOS device (override with DEVICE_ID=<udid>, or put the udid in a local DEVICE_ID file)
     cmds:
       - flutter run -d {{.DEVICE_ID}} --release
