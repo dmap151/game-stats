@@ -124,7 +124,11 @@ class DatabaseService {
   }
 
   Future<List<MatchRecord>> getAllMatchRecords() async {
-    return await isar.matchRecords.where().findAll();
+    final records = await isar.matchRecords.where().findAll();
+    for (final r in records) {
+      await r.game.load();
+    }
+    return records;
   }
 
   Future<List<MatchRecord>> getMatchRecordsForGame(int gameId) async {
@@ -138,6 +142,13 @@ class DatabaseService {
   Future<bool> deleteMatchRecord(int id) async {
     return await isar.writeTxn(() async {
       return await isar.matchRecords.delete(id);
+    });
+  }
+
+  /// Clears all tables in the database (Game, MatchRecord, Player).
+  Future<void> clearAllData() async {
+    await isar.writeTxn(() async {
+      await isar.clear();
     });
   }
 }

@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Flutter Architecture & UI Rules
 
 ## 1. Riverpod 2 State Management
