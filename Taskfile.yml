@@ -1,7 +1,10 @@
 version: '3'
 
+vars:
+  DEVICE_ID: '{{.DEVICE_ID | default "00008140-00113510343A801C"}}'
+
 tasks:
   ios:
-    desc: Build and install the release build on Finn's iPhone
+    desc: Build and install the release build on an iOS device (override with DEVICE_ID=<udid>)
     cmds:
-      - flutter run -d 00008140-00113510343A801C --release
+      - flutter run -d {{.DEVICE_ID}} --release
