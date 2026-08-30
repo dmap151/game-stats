@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  ios:
+    desc: Build and install the release build on Finn's iPhone
+    cmds:
+      - flutter run -d 00008140-00113510343A801C --release
