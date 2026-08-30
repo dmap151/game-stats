@@ -3,7 +3,7 @@ version: '3'
 vars:
   DEVICE_ID_FILE:
     sh: cat DEVICE_ID 2>/dev/null || true
-  DEVICE_ID: '{{.DEVICE_ID | default .DEVICE_ID_FILE | default "00008140-00113510343A801C"}}'
+  DEVICE_ID: '{{.DEVICE_ID | default .DEVICE_ID_FILE}}'
 
 tasks:
   ios:
