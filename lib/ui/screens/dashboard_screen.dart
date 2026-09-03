@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/providers.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/match_preview_card.dart';
+import '../widgets/backup_settings_dialog.dart';
 import 'match_history_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -20,6 +21,18 @@ class DashboardScreen extends ConsumerWidget {
         title: const Text('Dashboard'),
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cloud_sync_outlined),
+            tooltip: 'Daten sichern & importieren',
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (context) => const BackupSettingsDialog(),
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

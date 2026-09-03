@@ -4,11 +4,18 @@ import '../data/models/game.dart';
 import '../data/models/match_record.dart';
 import '../data/models/player_statistics.dart';
 import '../data/models/player.dart';
+import '../services/backup_service.dart';
 
 /// Provides the singleton instance of [DatabaseService].
 /// Must be overridden in the ProviderScope at the root of the app.
 final databaseProvider = Provider<DatabaseService>((ref) {
   throw UnimplementedError('DatabaseService is not initialized');
+});
+
+/// Provides the [BackupService] instance for exporting and importing data.
+final backupServiceProvider = Provider<BackupService>((ref) {
+  final db = ref.watch(databaseProvider);
+  return BackupService(db);
 });
 
 /// Streams all match records from the database.
