@@ -75,9 +75,11 @@ final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {
       }
 
       Game? mostPlayedGame;
+      int mostPlayedCount = 0;
       if (gameCounts.isNotEmpty) {
-        final mostPlayedGameId = gameCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-        mostPlayedGame = gamesMap[mostPlayedGameId];
+        final mostPlayedEntry = gameCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+        mostPlayedGame = gamesMap[mostPlayedEntry.key];
+        mostPlayedCount = mostPlayedEntry.value;
       }
 
       return PlayerStatistics(
@@ -85,6 +87,7 @@ final playerStatisticsProvider = Provider<PlayerStatistics>((ref) {
         totalWins: totalWins,
         globalWinRate: totalWins / records.length,
         mostPlayedGame: mostPlayedGame,
+        mostPlayedGameMatches: mostPlayedCount,
       );
     },
     loading: () => PlayerStatistics(

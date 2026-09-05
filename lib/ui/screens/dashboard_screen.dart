@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/providers.dart';
-import '../widgets/stat_card.dart';
-import '../widgets/match_preview_card.dart';
+import '../../utils/game_image_helper.dart';
 import '../widgets/backup_settings_dialog.dart';
+import '../widgets/match_preview_card.dart';
+import '../widgets/stat_card.dart';
+import 'game_details_screen.dart';
 import 'match_history_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -15,6 +19,90 @@ class DashboardScreen extends ConsumerWidget {
     final stats = ref.watch(playerStatisticsProvider);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final theme = Theme.of(context);
+    final records = matchRecordsAsync.value ?? const [];
+    final mostPlayedGame = stats.mostPlayedGame;
+    final mostPlayedImage = mostPlayedGame != null
+        ? GameImageHelper.getDisplayImage(mostPlayedGame, records)
+        : null;
+
+    final totalMatchesCard = StatCard(
+      title: 'Partien gespielt',
+      value: stats.totalMatchesPlayed.toString(),
+      subtitle: stats.totalMatchesPlayed == 0
+          ? 'Noch keine Partien erfasst'
+          : 'Insgesamt erfasst',
+      icon: Icons.casino_outlined,
+      color: theme.colorScheme.primary,
+      valueStyle: theme.textTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.bold,
+        color: theme.colorScheme.onSurface,
+      ),
+    );
+
+    final mostPlayedGameCard = StatCard(
+      title: 'Häufigstes Spiel',
+      value: mostPlayedGame?.name ?? 'Noch keine Partien',
+      subtitle: mostPlayedGame != null
+          ? '${stats.mostPlayedGameMatches} ${stats.mostPlayedGameMatches == 1 ? 'Partie' : 'Partien'} gespielt'
+          : null,
+      color: theme.colorScheme.secondary,
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
+        ),
+        child: CircleAvatar(
+          backgroundColor: theme.colorScheme.secondaryContainer,
+          child: mostPlayedImage != null
+              ? ClipOval(
+                  child: Image.file(
+                    File(mostPlayedImage),
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                    cacheWidth: 120,
+                    gaplessPlayback: true,
+                  ),
+                )
+              : Icon(
+                  Icons.favorite_outline,
+                  color: theme.colorScheme.onSecondaryContainer,
+                  size: 22,
+                ),
+        ),
+      ),
+      trailing: mostPlayedGame != null
+          ? Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                size: 18,
+                color: theme.colorScheme.secondary,
+              ),
+            )
+          : null,
+      onTap: mostPlayedGame != null
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => GameDetailsScreen(
+                    game: mostPlayedGame,
+                  ),
+                ),
+              );
+            }
+          : null,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -41,27 +129,27 @@ class DashboardScreen extends ConsumerWidget {
             'Globale Statistiken',
             style: theme.textTheme.headlineMedium,
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: StatCard(
-                  title: 'Partien gespielt',
-                  value: stats.totalMatchesPlayed.toString(),
-                  icon: Icons.casino_outlined,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: StatCard(
-                  title: 'Häufigstes Spiel',
-                  value: stats.mostPlayedGame?.name ?? '-',
-                  icon: Icons.favorite_outline,
-                  color: theme.colorScheme.secondary,
-                ),
-              ),
-            ],
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 600) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: totalMatchesCard),
+                    const SizedBox(width: 16),
+                    Expanded(child: mostPlayedGameCard),
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  totalMatchesCard,
+                  const SizedBox(height: 12),
+                  mostPlayedGameCard,
+                ],
+              );
+            },
           ),
           const SizedBox(height: 32),
           Text(
