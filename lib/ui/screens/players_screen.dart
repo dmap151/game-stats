@@ -262,13 +262,13 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                   ),
                   title: Text(
                     player.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   subtitle: Text(
                     subtitleText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
