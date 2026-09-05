@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../data/models/game.dart';
 import '../../data/models/match_record.dart';
 import '../../data/models/player.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/game_image_helper.dart';
 import '../widgets/edit_game_bottom_sheet.dart';
@@ -91,20 +92,21 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
   }
 
   void _deleteMatch(MatchRecord record) async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Partie löschen?'),
-        content: const Text('Möchtest du diese Partie wirklich unwiderruflich löschen?'),
+        title: Text(l10n.deleteMatchDialogTitle),
+        content: Text(l10n.deleteMatchDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Löschen'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -115,7 +117,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
       await db.deleteMatchRecord(record.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Partie wurde gelöscht.')),
+          SnackBar(content: Text(l10n.matchDeletedSuccess)),
         );
       }
     }
@@ -132,6 +134,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final playersAsync = ref.watch(playersProvider);
@@ -193,21 +196,21 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.photo_camera_outlined),
-                  tooltip: 'Spielbild bearbeiten',
+                  tooltip: l10n.editGameImageTooltip,
                   onPressed: () => _editGameImage(records),
                 ),
               ],
               backgroundColor: Colors.transparent,
               elevation: 0,
-              bottom: const TabBar(
+              bottom: TabBar(
                 tabs: [
-                  Tab(text: 'Historie & Chart'),
-                  Tab(text: 'Spieler-Ranking'),
+                  Tab(text: '${l10n.matchHistory} & Chart'),
+                  Tab(text: l10n.playerRankings),
                 ],
               ),
             ),
             body: gameRecords.isEmpty
-                ? const Center(child: Text('Keine Statistiken verfügbar.'))
+                ? Center(child: Text(l10n.noMatchesRecordedPrompt))
                 : _buildGameContent(context, gameRecords, playersAsync, theme),
           ),
         );
@@ -218,7 +221,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
       ),
       error: (_, _) => Scaffold(
         appBar: AppBar(title: Text(widget.game.name)),
-        body: const Center(child: Text('Fehler beim Laden')),
+        body: Center(child: Text(l10n.errorLoadingMatches)),
       ),
     );
   }
@@ -229,6 +232,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
     AsyncValue<List<Player>> playersAsync,
     ThemeData theme,
   ) {
+    final l10n = context.l10n;
     final sortedRecords = _sortRecords(gameRecords);
     
     final chronologicalGameRecords = List.of(gameRecords)..sort((a, b) => a.date.compareTo(b.date));
@@ -245,7 +249,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
     for (var r in gameRecords) {
       for (var score in r.playerScores) {
         final id = score.playerId ?? -1;
-        playerNames[id] = score.playerName ?? 'Unbekannt';
+        playerNames[id] = score.playerName ?? l10n.unknown;
         playerMatches[id] = (playerMatches[id] ?? 0) + 1;
         if (score.placement == 1) {
           playerWins[id] = (playerWins[id] ?? 0) + 1;
@@ -265,7 +269,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
             ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                Text('Höchste Punkte Verlauf', style: theme.textTheme.headlineMedium),
+                Text(l10n.scoreDistribution, style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 16),
                 Card(
                   elevation: 0,
@@ -283,13 +287,13 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Partien', style: theme.textTheme.headlineMedium),
+                    Text(l10n.totalMatches, style: theme.textTheme.headlineMedium),
                     DropdownButton<SortMode>(
                       value: _sortMode,
                       underline: const SizedBox(),
-                      items: const [
-                        DropdownMenuItem(value: SortMode.dateDesc, child: Text('Neueste zuerst')),
-                        DropdownMenuItem(value: SortMode.dateAsc, child: Text('Älteste zuerst')),
+                      items: [
+                        DropdownMenuItem(value: SortMode.dateDesc, child: Text(l10n.sortNewest)),
+                        DropdownMenuItem(value: SortMode.dateAsc, child: Text('${l10n.date} ↑')),
                       ],
                       onChanged: (mode) {
                         if (mode != null) {
@@ -320,7 +324,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
               itemBuilder: (context, index) {
                 final playerId = rankingList[index];
                 final pInfo = getPlayer(playerId);
-                final playerName = playerNames[playerId] ?? 'Unbekannt';
+                final playerName = playerNames[playerId] ?? l10n.unknown;
                 final wins = playerWins[playerId] ?? 0;
                 final matches = playerMatches[playerId] ?? 0;
                 final winRate = (wins / matches) * 100;
@@ -340,7 +344,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const Center(child: Text('Fehler beim Laden der Spieler')),
+      error: (_, _) => Center(child: Text(l10n.errorLoadingPlayers)),
     );
   }
 }

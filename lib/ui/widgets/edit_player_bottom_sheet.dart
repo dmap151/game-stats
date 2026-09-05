@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../l10n/l10n_extension.dart';
+
 class EditPlayerBottomSheet extends StatefulWidget {
   final String initialName;
   final String? initialImagePath;
@@ -51,6 +53,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -59,7 +62,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Foto aufnehmen'),
+              title: Text(l10n.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -67,7 +70,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Aus Galerie wählen'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -81,6 +84,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
@@ -94,7 +98,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Profil bearbeiten', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(l10n.editProfileTooltip, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             Center(
               child: Stack(
@@ -132,9 +136,9 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
             const SizedBox(height: 24),
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.playerNameLabel,
+                border: const OutlineInputBorder(),
               ),
               autofocus: true,
             ),
@@ -147,7 +151,7 @@ class _EditPlayerBottomSheetState extends State<EditPlayerBottomSheet> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Änderungen speichern'),
+              child: Text(l10n.saveChanges),
             ),
             const SizedBox(height: 24),
           ],

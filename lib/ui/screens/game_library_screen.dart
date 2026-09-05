@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/game.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/game_image_helper.dart';
 import '../../utils/game_sorting_helper.dart';
@@ -55,6 +56,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
   }
 
   void _showSortBottomSheet(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     showModalBottomSheet<void>(
       context: context,
@@ -70,7 +72,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Text(
-                'Spiele sortieren nach',
+                l10n.sortGamesBy,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -90,7 +92,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
                           : theme.colorScheme.onSurfaceVariant,
                     ),
                     title: Text(
-                      option.label,
+                      option.getLocalizedLabel(context),
                       style: TextStyle(
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -120,19 +122,20 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final gamesAsync = ref.watch(gamesProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spiele-Bibliothek'),
+        title: Text(l10n.libraryTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.sort),
-            tooltip: 'Sortieren',
+            tooltip: l10n.sortTooltip,
             onPressed: () => _showSortBottomSheet(context),
           ),
         ],
@@ -174,7 +177,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
           if (sortedGames.isEmpty) {
             return Center(
               child: Text(
-                'Noch keine Spiele in der Bibliothek.',
+                l10n.noGamesInLibrary,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -198,7 +201,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
               final imagePath = gameImages[game.id];
               final lastPlayed = gameStats.lastPlayed;
               final lastPlayedText = lastPlayed != null
-                  ? ' • Zuletzt ${DateFormat('dd.MM.yyyy').format(lastPlayed)}'
+                  ? l10n.lastPlayedPrefix(DateFormat('dd.MM.yyyy').format(lastPlayed))
                   : '';
 
               return Card(
@@ -260,7 +263,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    '$matchesCount ${matchesCount == 1 ? 'Partie' : 'Partien'} gespielt$lastPlayedText',
+                    '${l10n.gameSubtitle(matchesCount)}$lastPlayedText',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
@@ -278,7 +281,7 @@ class _GameLibraryScreenState extends ConsumerState<GameLibraryScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
-            const Center(child: Text('Fehler beim Laden der Bibliothek')),
+            Center(child: Text(l10n.errorLoadingLibrary)),
       ),
     );
   }

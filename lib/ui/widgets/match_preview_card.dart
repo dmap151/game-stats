@@ -5,6 +5,7 @@ import '../../data/models/match_record.dart';
 import '../screens/game_details_screen.dart';
 import 'package:collection/collection.dart';
 import 'location_badge.dart';
+import '../../l10n/l10n_extension.dart';
 
 class MatchPreviewCard extends StatelessWidget {
   final MatchRecord match;
@@ -21,10 +22,15 @@ class MatchPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseGameName = match.game.value?.name ?? 'Unbekanntes Spiel';
+    final baseGameName = match.game.value?.name ?? context.l10n.unknownGame;
     final gameName = matchIndex != null ? '$baseGameName #$matchIndex' : baseGameName;
     final winner = match.playerScores.where((p) => p.placement == 1).firstOrNull;
-    final subtitleText = '${DateFormat('dd.MM.yyyy').format(match.date)} • ${winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden'}';
+    final winnerText = winner != null
+        ? (winner.playerName != null
+            ? context.l10n.playerWon(winner.playerName!)
+            : context.l10n.winner)
+        : context.l10n.tiedLabel;
+    final subtitleText = '${DateFormat('dd.MM.yyyy').format(match.date)} • $winnerText';
 
     return Card(
       elevation: 0,

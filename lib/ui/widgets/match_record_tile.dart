@@ -7,6 +7,7 @@ import '../../data/models/game.dart';
 import '../../data/models/player.dart';
 import 'full_screen_image_viewer.dart';
 import 'location_badge.dart';
+import '../../l10n/l10n_extension.dart';
 
 class MatchRecordTile extends StatelessWidget {
   final MatchRecord record;
@@ -78,7 +79,14 @@ class MatchRecordTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('${game.name} #$matchIndex', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(winner != null ? '${winner.playerName} hat gewonnen' : 'Unentschieden', style: theme.textTheme.bodySmall),
+                  Text(
+                    winner != null
+                        ? (winner.playerName != null
+                            ? context.l10n.playerWon(winner.playerName!)
+                            : context.l10n.winner)
+                        : context.l10n.tiedLabel,
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),
@@ -88,19 +96,19 @@ class MatchRecordTile extends StatelessWidget {
                 if (value == 'delete') onDelete();
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
                   child: ListTile(
-                    leading: Icon(Icons.edit),
-                    title: Text('Bearbeiten'),
+                    leading: const Icon(Icons.edit),
+                    title: Text(context.l10n.edit),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: ListTile(
-                    leading: Icon(Icons.delete, color: Colors.red),
-                    title: Text('Löschen', style: TextStyle(color: Colors.red)),
+                    leading: const Icon(Icons.delete, color: Colors.red),
+                    title: Text(context.l10n.delete, style: const TextStyle(color: Colors.red)),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -113,7 +121,7 @@ class MatchRecordTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${DateFormat('dd.MM.yyyy').format(record.date)} - ${record.numberOfPlayers} Spieler',
+              '${DateFormat('dd.MM.yyyy').format(record.date)} - ${context.l10n.playerCount(record.numberOfPlayers)}',
             ),
             if (record.latitude != null && record.longitude != null) ...[
               const SizedBox(height: 2),
@@ -176,12 +184,12 @@ class MatchRecordTile extends StatelessWidget {
                     )
                   : Text(ps.playerName?.isNotEmpty == true ? ps.playerName!.substring(0, 1).toUpperCase() : '?'),
               ),
-              title: Text(ps.playerName ?? 'Unbekannt'),
+              title: Text(ps.playerName ?? context.l10n.unknown),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (ps.score != null) ...[
-                    Text('${ps.score} Punkte', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(context.l10n.pointsCount(ps.score!), style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(width: 12),
                   ],
                   Container(

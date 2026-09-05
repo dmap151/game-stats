@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game_stats/data/models/game.dart';
 import 'package:game_stats/data/models/match_record.dart';
+import 'package:game_stats/l10n/app_localizations.dart';
 import 'package:game_stats/providers/providers.dart';
 import 'package:game_stats/ui/screens/game_library_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,7 +51,12 @@ void main() {
             (ref) => Stream.value([m1, m2, m3]),
           ),
         ],
-        child: const MaterialApp(home: GameLibraryScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('de'),
+          home: GameLibraryScreen(),
+        ),
       ),
     );
 

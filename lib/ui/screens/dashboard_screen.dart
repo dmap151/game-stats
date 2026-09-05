@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/game_image_helper.dart';
 import '../widgets/backup_settings_dialog.dart';
@@ -16,6 +17,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final stats = ref.watch(playerStatisticsProvider);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final theme = Theme.of(context);
@@ -26,11 +28,11 @@ class DashboardScreen extends ConsumerWidget {
         : null;
 
     final totalMatchesCard = StatCard(
-      title: 'Partien gespielt',
+      title: l10n.matchesPlayed,
       value: stats.totalMatchesPlayed.toString(),
       subtitle: stats.totalMatchesPlayed == 0
-          ? 'Noch keine Partien erfasst'
-          : 'Insgesamt erfasst',
+          ? l10n.noMatchesRecorded
+          : l10n.totalRecorded,
       icon: Icons.casino_outlined,
       color: theme.colorScheme.primary,
       valueStyle: theme.textTheme.headlineSmall?.copyWith(
@@ -40,10 +42,10 @@ class DashboardScreen extends ConsumerWidget {
     );
 
     final mostPlayedGameCard = StatCard(
-      title: 'Häufigstes Spiel',
-      value: mostPlayedGame?.name ?? 'Noch keine Partien',
+      title: l10n.mostPlayedGame,
+      value: mostPlayedGame?.name ?? l10n.noMatchesYet,
       subtitle: mostPlayedGame != null
-          ? '${stats.mostPlayedGameMatches} ${stats.mostPlayedGameMatches == 1 ? 'Partie' : 'Partien'} gespielt'
+          ? l10n.matchesPlayedCount(stats.mostPlayedGameMatches)
           : null,
       color: theme.colorScheme.secondary,
       leading: Container(
@@ -106,13 +108,13 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: Text(l10n.navDashboard),
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
-            icon: const Icon(Icons.cloud_sync_outlined),
-            tooltip: 'Daten sichern & importieren',
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: l10n.manageDataTooltip,
             onPressed: () {
               showDialog<void>(
                 context: context,
@@ -126,7 +128,7 @@ class DashboardScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         children: [
           Text(
-            'Globale Statistiken',
+            l10n.globalStatistics,
             style: theme.textTheme.headlineMedium,
           ),
           const SizedBox(height: 16),
@@ -153,7 +155,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
           Text(
-            'Zuletzt gespielt',
+            l10n.recentlyPlayed,
             style: theme.textTheme.headlineMedium,
           ),
           const SizedBox(height: 16),
@@ -165,7 +167,7 @@ class DashboardScreen extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Text(
-                      'Noch keine Partien eingetragen.',
+                      l10n.noMatchesRecordedPrompt,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -214,14 +216,14 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.history),
-                    label: const Text('Gesamte Historie ansehen'),
+                    label: Text(l10n.viewFullHistory),
                   ),
                 ],
                 ],
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => const Center(child: Text('Fehler beim Laden der Partien')),
+            error: (_, _) => Center(child: Text(l10n.errorLoadingMatches)),
           ),
         ],
       ),

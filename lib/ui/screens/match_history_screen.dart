@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../widgets/match_preview_card.dart';
 
@@ -9,12 +10,13 @@ class MatchHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gesamte Historie'),
+        title: Text(l10n.fullHistory),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -23,7 +25,7 @@ class MatchHistoryScreen extends ConsumerWidget {
           if (records.isEmpty) {
             return Center(
               child: Text(
-                'Noch keine Partien eingetragen.',
+                l10n.noMatchesRecordedPrompt,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -62,7 +64,7 @@ class MatchHistoryScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(child: Text('Fehler beim Laden der Historie')),
+        error: (_, _) => Center(child: Text(l10n.errorLoadingHistory)),
       ),
     );
   }

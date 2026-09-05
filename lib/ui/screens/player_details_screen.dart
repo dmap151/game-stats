@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:intl/intl.dart';
 
 import '../../data/models/player.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../widgets/full_screen_image_viewer.dart';
 import '../widgets/edit_player_bottom_sheet.dart';
@@ -45,6 +46,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
   }
 
   void _editProfile() async {
+    final l10n = context.l10n;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -66,7 +68,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
             });
             if (mounted) {
               ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(content: Text('Profil erfolgreich aktualisiert!')),
+                SnackBar(content: Text(l10n.profileUpdatedSuccess)),
               );
             }
           }
@@ -76,20 +78,21 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
   }
 
   void _deletePlayer() async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Spieler löschen?'),
-        content: const Text('Möchtest du diesen Spieler wirklich löschen? Historische Partien bleiben erhalten, aber der Spieler wird aus der Auswahlliste entfernt.'),
+        title: Text(l10n.deletePlayerDialogTitle),
+        content: Text(l10n.deletePlayerDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Löschen'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -106,12 +109,13 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spieler-Profil'),
+        title: Text(_currentPlayer.name),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -121,19 +125,19 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
               if (value == 'delete') _deletePlayer();
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child: ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text('Profil bearbeiten'),
+                  leading: const Icon(Icons.edit),
+                  title: Text(l10n.editProfileTooltip),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: ListTile(
-                  leading: Icon(Icons.delete, color: Colors.red),
-                  title: Text('Spieler löschen', style: TextStyle(color: Colors.red)),
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: Text(l10n.deletePlayerTooltip, style: const TextStyle(color: Colors.red)),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -194,29 +198,30 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              Text('Statistiken', style: theme.textTheme.headlineMedium),
+              Text(l10n.globalStatistics, style: theme.textTheme.headlineMedium),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatColumn(context, label: 'Partien', value: playerMatches.length.toString()),
-                  _buildStatColumn(context, label: 'Siege', value: wins.toString()),
-                  _buildStatColumn(context, label: 'Win Rate', value: '${winRate.toStringAsFixed(1)}%'),
+                  _buildStatColumn(context, label: l10n.matchesCount, value: playerMatches.length.toString()),
+                  _buildStatColumn(context, label: l10n.winsCount, value: wins.toString()),
+                  _buildStatColumn(context, label: l10n.winRateLabel, value: '${winRate.toStringAsFixed(1)}%'),
                 ],
               ),
               const SizedBox(height: 32),
-              Text('Historie', style: theme.textTheme.headlineMedium),
+              Text(l10n.matchHistory, style: theme.textTheme.headlineMedium),
               const SizedBox(height: 16),
               if (playerMatches.isEmpty)
-                const Center(
+                Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Text('Noch keine Partien gespielt.'),
+                    padding: const EdgeInsets.all(32.0),
+                    child: Text(l10n.noGamesPlayedYet),
                   ),
                 ),
               ...playerMatches.map((match) {
                 final score = match.playerScores.firstWhere((s) => s.playerId == _currentPlayer.id);
-                final gameName = match.game.value?.name ?? 'Unbekanntes Spiel';
+                final gameName = match.game.value?.name ?? '';
+                final scoreText = score.score != null ? ' • ${score.score} ${l10n.score}' : '';
                 
                 return Card(
                   elevation: 0,
@@ -235,7 +240,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                       ),
                     ),
                     title: Text(gameName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${DateFormat('dd.MM.yyyy').format(match.date)} • ${score.score} Punkte'),
+                    subtitle: Text('${DateFormat('dd.MM.yyyy').format(match.date)}$scoreText'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       if (match.game.value != null) {
@@ -254,7 +259,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(child: Text('Fehler beim Laden der Statistiken.')),
+        error: (_, _) => Center(child: Text(l10n.errorLoadingMatches)),
       ),
     );
   }

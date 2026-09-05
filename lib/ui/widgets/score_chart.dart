@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/match_record.dart';
+import '../../l10n/l10n_extension.dart';
 
 class ScoreChart extends StatelessWidget {
   final List<MatchRecord> records;
@@ -12,11 +13,11 @@ class ScoreChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final validRecords = records.where((r) => r.playerScores.any((s) => s.score != null)).toList();
     if (validRecords.length < 2) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Text(
-            'Nicht genug Daten für ein Diagramm (min. 2 Partien mit Punkten nötig)',
+            context.l10n.notEnoughChartData,
             textAlign: TextAlign.center,
           ),
         ),

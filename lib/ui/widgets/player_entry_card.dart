@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/models/player.dart';
+import '../../l10n/l10n_extension.dart';
 
 class PlayerEntryCard extends StatelessWidget {
   final String playerName;
@@ -121,9 +122,9 @@ class PlayerEntryCard extends StatelessWidget {
                       return TextFormField(
                         controller: controller,
                         focusNode: focusNode,
-                        decoration: const InputDecoration(
-                          labelText: 'Spieler auswählen',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: context.l10n.selectPlayer,
+                          border: const OutlineInputBorder(),
                         ),
                         onChanged: onPlayerNameChanged,
                         onFieldSubmitted: (_) => onFieldSubmitted(),
@@ -145,10 +146,10 @@ class PlayerEntryCard extends StatelessWidget {
                 Expanded(
                   child: TextFormField(
                     initialValue: placement.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Platz',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.emoji_events_outlined),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.rank,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.emoji_events_outlined),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (val) => onPlacementChanged(int.tryParse(val) ?? 1),
@@ -158,10 +159,10 @@ class PlayerEntryCard extends StatelessWidget {
                 Expanded(
                   child: TextFormField(
                     initialValue: score?.toString() ?? '',
-                    decoration: const InputDecoration(
-                      labelText: 'Punkte',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.scoreboard_outlined),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.score,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.scoreboard_outlined),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (val) => onScoreChanged(val.isEmpty ? null : int.tryParse(val)),

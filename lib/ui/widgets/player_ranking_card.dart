@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/models/player.dart';
 import 'full_screen_image_viewer.dart';
+import '../../l10n/l10n_extension.dart';
 
 class PlayerRankingCard extends StatelessWidget {
   final int playerId;
@@ -84,13 +85,13 @@ class PlayerRankingCard extends StatelessWidget {
           ],
         ),
         title: Text(playerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('$matches gespielte Partien'),
+        subtitle: Text(context.l10n.matchesPlayedCount(matches)),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('$wins Siege', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
-            Text('${winRate.toStringAsFixed(1)}% Win Rate', style: theme.textTheme.labelSmall),
+            Text(context.l10n.winCount(wins), style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
+            Text('${winRate.toStringAsFixed(1)}% ${context.l10n.winRateLabel}', style: theme.textTheme.labelSmall),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../data/models/match_record.dart';
 import '../../data/models/game.dart';
@@ -106,6 +107,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -114,7 +116,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Foto aufnehmen'),
+              title: Text(l10n.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -122,7 +124,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Aus Galerie wählen'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -162,11 +164,12 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   }
 
   void _saveMatch(List<Player> availablePlayers) async {
+    final l10n = context.l10n;
     if (_formKey.currentState!.validate()) {
       if (_playerEntries.any((p) => (p.playerName == null || p.playerName!.trim().isEmpty))) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bitte für jeden Eintrag einen Spielernamen eingeben.'),
+          SnackBar(
+            content: Text(l10n.errorEnterPlayerName),
           ),
         );
         return;
@@ -244,8 +247,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           SnackBar(
             content: Text(
               widget.existingMatch == null
-                  ? 'Ergebnis gespeichert!'
-                  : 'Änderungen gespeichert!',
+                  ? l10n.matchSavedSuccess
+                  : l10n.matchUpdatedSuccess,
             ),
           ),
         );
@@ -269,6 +272,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final playersAsync = ref.watch(playersProvider);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
@@ -286,8 +290,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         appBar: AppBar(
           title: Text(
             widget.existingMatch == null
-                ? 'Ergebnis eintragen'
-                : 'Partie bearbeiten',
+                ? l10n.newMatchTitle
+                : l10n.editMatchTitle,
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -295,8 +299,8 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       body: playersAsync.when(
         data: (players) {
           if (players.isEmpty) {
-            return const Center(
-              child: Text('Bitte lege zuerst Spieler im "Spieler"-Tab an.'),
+            return Center(
+              child: Text(l10n.pleaseAddPlayersFirst),
             );
           }
 
@@ -324,13 +328,13 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                     return TextFormField(
                       controller: controller,
                       focusNode: focusNode,
-                      decoration: const InputDecoration(
-                        labelText: 'Spielname',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.casino_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.gameNameLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.casino_outlined),
                       ),
                       validator: (value) => value == null || value.trim().isEmpty
-                          ? 'Bitte Spielnamen eingeben'
+                          ? l10n.gameNameValidator
                           : null,
                       onSaved: (val) => _gameNameController.text = val?.trim() ?? '',
                       onChanged: (val) => _gameNameController.text = val,
@@ -344,11 +348,11 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.calendar_today),
-                  title: const Text('Datum der Partie'),
+                  title: Text(l10n.matchDate),
                   subtitle: Text('${_date.day}.${_date.month}.${_date.year}'),
                   onTap: () async {
                     final picked = await showDatePicker(
-                      context: context,
+                       context: context,
                       initialDate: _date,
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now(),
@@ -369,14 +373,14 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Erinnerungsfoto (optional)',
+                            l10n.memoryPhoto,
                             style: theme.textTheme.labelLarge,
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             onPressed: _showImageSourceDialog,
                             icon: const Icon(Icons.add_a_photo),
-                            label: const Text('Bild hinzufügen'),
+                            label: Text(l10n.addImage),
                           ),
                         ],
                       ),
@@ -433,7 +437,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                 ],
                 const SizedBox(height: 32),
 
-                Text('Mitspieler', style: theme.textTheme.headlineMedium),
+                Text(l10n.coPlayers, style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 16),
 
                 ..._playerEntries.asMap().entries.map((entry) {
@@ -456,13 +460,13 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                 TextButton.icon(
                   onPressed: _addPlayerEntry,
                   icon: const Icon(Icons.add),
-                  label: const Text('Weiteren Spieler hinzufügen'),
+                  label: Text(l10n.addAnotherPlayer),
                 ),
                 const SizedBox(height: 32),
                 PrimaryButton(
                   label: widget.existingMatch == null
-                      ? 'Speichern'
-                      : 'Änderungen speichern',
+                      ? l10n.save
+                      : l10n.saveChanges,
                   icon: Icons.save_outlined,
                   onPressed: () => _saveMatch(players),
                 ),
@@ -472,7 +476,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
-            const Center(child: Text('Fehler beim Laden der Spieler')),
+            Center(child: Text(l10n.errorLoadingPlayers)),
       ),
       ),
     );

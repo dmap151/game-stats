@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/models/game.dart';
 import '../data/models/match_record.dart';
+import '../l10n/l10n_extension.dart';
 
 /// Available sorting options for the games library list.
 enum GameSortOption {
@@ -11,6 +12,24 @@ enum GameSortOption {
   matchesAsc,
   recentlyPlayed,
   newest;
+
+  String getLocalizedLabel(BuildContext context) {
+    final l10n = context.l10n;
+    switch (this) {
+      case GameSortOption.nameAsc:
+        return l10n.sortNameAsc;
+      case GameSortOption.nameDesc:
+        return l10n.sortNameDesc;
+      case GameSortOption.matchesDesc:
+        return l10n.sortMatchesDesc;
+      case GameSortOption.matchesAsc:
+        return l10n.sortMatchesAsc;
+      case GameSortOption.recentlyPlayed:
+        return l10n.sortRecentlyPlayed;
+      case GameSortOption.newest:
+        return l10n.sortNewest;
+    }
+  }
 
   String get label {
     switch (this) {

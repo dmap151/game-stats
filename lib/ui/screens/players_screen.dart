@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/player.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/player_sorting_helper.dart';
 import '../widgets/full_screen_image_viewer.dart';
@@ -57,6 +58,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
   }
 
   void _showSortBottomSheet(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     showModalBottomSheet<void>(
       context: context,
@@ -72,7 +74,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Text(
-                'Spieler sortieren nach',
+                l10n.sortPlayersBy,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -92,7 +94,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                           : theme.colorScheme.onSurfaceVariant,
                     ),
                     title: Text(
-                      option.label,
+                      option.getLocalizedLabel(context),
                       style: TextStyle(
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -155,24 +157,25 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final playersAsync = ref.watch(playersProvider);
     final matchRecordsAsync = ref.watch(matchRecordsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spieler'),
+        title: Text(l10n.playersTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.sort),
-            tooltip: 'Sortieren',
+            tooltip: l10n.sortTooltip,
             onPressed: () => _showSortBottomSheet(context),
           ),
           IconButton(
             icon: const Icon(Icons.query_stats),
-            tooltip: 'Spieler vergleichen',
+            tooltip: l10n.comparePlayersTooltip,
             onPressed: () {
               Navigator.push(
                 context,
@@ -189,7 +192,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
           if (players.isEmpty) {
             return Center(
               child: Text(
-                'Noch keine Spieler angelegt.',
+                l10n.noPlayersFound,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -216,8 +219,12 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
               final playerStats =
                   statsMap[player.id] ?? const PlayerSortStats();
               final subtitleText = playerStats.matches == 0
-                  ? 'Noch keine Partien'
-                  : '${playerStats.matches} ${playerStats.matches == 1 ? 'Partie' : 'Partien'} • ${playerStats.wins} ${playerStats.wins == 1 ? 'Sieg' : 'Siege'} (${playerStats.winRate.toStringAsFixed(0)}%)';
+                  ? l10n.noMatchesYet
+                  : l10n.playerStatsSubtitle(
+                      playerStats.matches,
+                      playerStats.winRate.toStringAsFixed(0),
+                      playerStats.wins,
+                    );
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -255,7 +262,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                             )
                           : Text(
                               player.name.isNotEmpty
-                                  ? player.name.substring(0, 1).toUpperCase()
+                                    ? player.name.substring(0, 1).toUpperCase()
                                   : '?',
                             ),
                     ),
@@ -287,12 +294,12 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
-            const Center(child: Text('Fehler beim Laden der Spieler')),
+            Center(child: Text(l10n.errorLoadingPlayers)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddPlayerDialog,
         icon: const Icon(Icons.person_add),
-        label: const Text('Spieler anlegen'),
+        label: Text(l10n.newPlayerDialogTitle),
       ),
     );
   }
@@ -328,6 +335,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -336,7 +344,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Foto aufnehmen'),
+              title: Text(l10n.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -344,7 +352,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Aus Galerie wählen'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -358,6 +366,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
@@ -371,9 +380,9 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Neuen Spieler anlegen',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              l10n.newPlayerDialogTitle,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             Center(
@@ -414,9 +423,9 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
             const SizedBox(height: 24),
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.playerNameLabel,
+                border: const OutlineInputBorder(),
               ),
               autofocus: true,
             ),
@@ -429,7 +438,7 @@ class _AddPlayerBottomSheetState extends State<_AddPlayerBottomSheet> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Speichern'),
+              child: Text(l10n.save),
             ),
             const SizedBox(height: 24),
           ],

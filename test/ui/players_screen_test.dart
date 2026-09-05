@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game_stats/data/models/match_record.dart';
 import 'package:game_stats/data/models/player.dart';
+import 'package:game_stats/l10n/app_localizations.dart';
 import 'package:game_stats/providers/providers.dart';
 import 'package:game_stats/ui/screens/players_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,7 +53,12 @@ void main() {
               (ref) => Stream.value([match1, match2]),
             ),
           ],
-          child: const MaterialApp(home: PlayersScreen()),
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('de'),
+            home: PlayersScreen(),
+          ),
         ),
       );
 

@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../data/models/game.dart';
 import '../../data/models/match_record.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../utils/game_image_helper.dart';
 
 class EditGameBottomSheet extends StatefulWidget {
@@ -44,6 +45,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -52,7 +54,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Foto aufnehmen'),
+              title: Text(l10n.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -60,7 +62,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Aus Galerie wählen'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -74,6 +76,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final fallbackMatchImage = GameImageHelper.getFallbackMatchImage(
       widget.game,
@@ -83,7 +86,6 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
     // Determine current display image
     String? currentImagePath;
     bool isCustom = false;
-    bool isFallback = false;
 
     if (_selectedNewImage != null) {
       currentImagePath = _selectedNewImage!.path;
@@ -96,7 +98,6 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
       isCustom = true;
     } else if (fallbackMatchImage != null) {
       currentImagePath = fallbackMatchImage;
-      isFallback = true;
     }
 
     return SafeArea(
@@ -112,7 +113,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Spielbild bearbeiten',
+              l10n.editGameImageTooltip,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -162,33 +163,6 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            Center(
-              child: Chip(
-                avatar: Icon(
-                  isCustom
-                      ? Icons.person
-                      : (isFallback ? Icons.auto_awesome : Icons.image_not_supported_outlined),
-                  size: 16,
-                  color: isCustom
-                      ? theme.colorScheme.primary
-                      : (isFallback ? theme.colorScheme.tertiary : theme.colorScheme.outline),
-                ),
-                label: Text(
-                  isCustom
-                      ? 'Eigenes hochgeladenes Bild'
-                      : (isFallback
-                          ? 'Automatisch aus Partie'
-                          : 'Kein Bild vorhanden'),
-                  style: theme.textTheme.labelMedium,
-                ),
-                backgroundColor: isCustom
-                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                    : (isFallback
-                        ? theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4)
-                        : theme.colorScheme.surfaceContainerHighest),
-              ),
-            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -196,7 +170,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library),
-                    label: const Text('Aus Galerie'),
+                    label: Text(l10n.chooseFromGallery),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -204,7 +178,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt),
-                    label: const Text('Kamera'),
+                    label: Text(l10n.takePhoto),
                   ),
                 ),
               ],
@@ -220,7 +194,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
                 },
                 icon: Icon(Icons.refresh, color: theme.colorScheme.error),
                 label: Text(
-                  'Eigenes Bild entfernen (Partie-Bild nutzen)',
+                  l10n.removeCustomImage,
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),
@@ -231,7 +205,7 @@ class _EditGameBottomSheetState extends State<EditGameBottomSheet> {
                 widget.onSave(_selectedNewImage, _removedCustomImage);
                 Navigator.pop(context);
               },
-              child: const Text('Speichern'),
+              child: Text(l10n.save),
             ),
             const SizedBox(height: 16),
           ],

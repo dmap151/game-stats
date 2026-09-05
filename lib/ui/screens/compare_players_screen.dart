@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/player.dart';
+import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +69,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final playersAsync = ref.watch(playersProvider);
     final theme = Theme.of(context);
 
@@ -79,14 +81,14 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Spieler Vergleich'),
+          title: Text(l10n.comparePlayersTitle),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: playersAsync.when(
         data: (players) {
           if (players.isEmpty) {
-            return const Center(child: Text('Keine Spieler verfügbar.'));
+            return Center(child: Text(l10n.noPlayersAvailable));
           }
 
           final player1 = players.firstWhereOrNull((p) => p.id == p1Id);
@@ -121,8 +123,14 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
               Expanded(
                 child: player1 != null && player2 != null
                     ? _buildStatsView(player1, player2, theme)
-                    : const Center(
-                        child: Text('Bitte wähle zwei Spieler aus.'),
+                    : Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Text(
+                            l10n.selectBothPlayersPrompt,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
               ),
             ],
@@ -130,7 +138,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
-            const Center(child: Text('Fehler beim Laden der Spieler')),
+            Center(child: Text(l10n.errorLoadingPlayers)),
         ),
       ),
     );
@@ -257,6 +265,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
             },
             fieldViewBuilder:
                 (context, controller, focusNode, onFieldSubmitted) {
+                  final l10n = context.l10n;
                   return ValueListenableBuilder<TextEditingValue>(
                     valueListenable: controller,
                     builder: (context, value, child) {
@@ -264,7 +273,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                         controller: controller,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: playerNum == 1 ? 'Spieler 1' : 'Spieler 2',
+                          labelText: playerNum == 1 ? '${l10n.players} 1' : '${l10n.players} 2',
                           border: const OutlineInputBorder(),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -358,11 +367,12 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
   }
 
   Widget _buildStatsView(Player p1, Player p2, ThemeData theme) {
+    final l10n = context.l10n;
     final stats = ref.watch(headToHeadStatsProvider((p1: p1.id, p2: p2.id)));
 
     if (stats.matchesTogether == 0) {
-      return const Center(
-        child: Text('Diese Spieler haben noch keine Spiele zusammen gespielt.'),
+      return Center(
+        child: Text(l10n.noSharedMatches),
       );
     }
 
@@ -410,7 +420,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
         const SizedBox(height: 8),
         Center(
           child: Text(
-            'Bessere Platzierung',
+            l10n.leaderLabel,
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -432,10 +442,10 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Detaillierte Stats', style: theme.textTheme.titleLarge),
+                Text(l10n.globalStatistics, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 16),
                 _buildStatRow(
-                  'Gemeinsame Spiele',
+                  l10n.sharedMatches,
                   '${stats.matchesTogether}',
                   '${stats.matchesTogether}',
                   theme,
@@ -443,7 +453,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                 ),
                 const Divider(),
                 _buildStatRow(
-                  'Unentschieden',
+                  l10n.tiedLabel,
                   '${stats.ties}',
                   '${stats.ties}',
                   theme,
@@ -451,14 +461,14 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                 ),
                 const Divider(),
                 _buildStatRow(
-                  '1. Plätze (in gleichen Partien)',
+                  '${l10n.rankValue(1)} (${l10n.totalMatches})',
                   '${stats.player1Wins}',
                   '${stats.player2Wins}',
                   theme,
                 ),
                 const Divider(),
                 _buildStatRow(
-                  'Durchschnittliche Platzierung',
+                  'Ø ${l10n.rankLabel}',
                   stats.player1AveragePlacement.toStringAsFixed(1),
                   stats.player2AveragePlacement.toStringAsFixed(1),
                   theme,
@@ -473,7 +483,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
         // Shared Matches List
         Center(
           child: Text(
-            'Gemeinsame Spiele',
+            l10n.sharedMatches,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -481,7 +491,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
         ),
         const SizedBox(height: 8),
         if (stats.sharedMatches.isEmpty)
-          const Center(child: Text('Keine gemeinsamen Spiele.'))
+          Center(child: Text(l10n.noSharedMatches))
         else
           ...stats.sharedMatches.map((match) {
             final p1ScoreOpt = match.playerScores.firstWhereOrNull(
@@ -505,7 +515,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${p1ScoreOpt.placement}. Platz',
+                      '${p1ScoreOpt.placement}. ${l10n.rank}',
                       style: TextStyle(
                         fontWeight: p1ScoreOpt.placement < p2ScoreOpt.placement
                             ? FontWeight.bold
@@ -523,7 +533,7 @@ class _ComparePlayersScreenState extends ConsumerState<ComparePlayersScreen> {
                       ),
                     ),
                     Text(
-                      '${p2ScoreOpt.placement}. Platz',
+                      '${p2ScoreOpt.placement}. ${l10n.rank}',
                       style: TextStyle(
                         fontWeight: p2ScoreOpt.placement < p1ScoreOpt.placement
                             ? FontWeight.bold

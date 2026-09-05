@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/models/match_record.dart';
 import '../data/models/player.dart';
+import '../l10n/l10n_extension.dart';
 
 /// Available sorting options for the players list.
 enum PlayerSortOption {
@@ -12,6 +13,26 @@ enum PlayerSortOption {
   winsDesc,
   winRateDesc,
   newest;
+
+  String getLocalizedLabel(BuildContext context) {
+    final l10n = context.l10n;
+    switch (this) {
+      case PlayerSortOption.nameAsc:
+        return l10n.sortNameAsc;
+      case PlayerSortOption.nameDesc:
+        return l10n.sortNameDesc;
+      case PlayerSortOption.matchesDesc:
+        return l10n.sortMatchesDesc;
+      case PlayerSortOption.matchesAsc:
+        return l10n.sortMatchesAsc;
+      case PlayerSortOption.winsDesc:
+        return l10n.sortWinsDesc;
+      case PlayerSortOption.winRateDesc:
+        return l10n.sortWinRateDesc;
+      case PlayerSortOption.newest:
+        return l10n.sortNewest;
+    }
+  }
 
   String get label {
     switch (this) {

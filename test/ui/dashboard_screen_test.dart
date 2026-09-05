@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game_stats/data/models/game.dart';
 import 'package:game_stats/data/models/match_record.dart';
+import 'package:game_stats/l10n/app_localizations.dart';
 import 'package:game_stats/providers/providers.dart';
 import 'package:game_stats/ui/screens/dashboard_screen.dart';
 import 'package:game_stats/ui/widgets/stat_card.dart';
@@ -32,7 +33,12 @@ void main() {
             (ref) => Stream.value([match1, match2]),
           ),
         ],
-        child: const MaterialApp(home: DashboardScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('de'),
+          home: DashboardScreen(),
+        ),
       ),
     );
 
@@ -63,7 +69,12 @@ void main() {
             (ref) => Stream.value([]),
           ),
         ],
-        child: const MaterialApp(home: DashboardScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('de'),
+          home: DashboardScreen(),
+        ),
       ),
     );
 
