@@ -14,6 +14,7 @@ import '../../services/location_service.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/full_screen_image_viewer.dart';
 import '../widgets/player_entry_card.dart';
+import '../widgets/location_picker_dialog.dart';
 
 class _PlayerEntryForm {
   int? playerId;
@@ -36,6 +37,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   final _gameNameController = TextEditingController();
   DateTime _date = DateTime.now();
   final List<File> _selectedImages = [];
+  bool _useLocation = true;
+  double? _latitude;
+  double? _longitude;
 
   final List<_PlayerEntryForm> _playerEntries = [];
 
@@ -46,6 +50,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       final match = widget.existingMatch!;
       _gameNameController.text = match.game.value?.name ?? '';
       _date = match.date;
+      _latitude = match.latitude;
+      _longitude = match.longitude;
+      _useLocation = match.latitude != null && match.longitude != null;
       if (match.imagePath != null) {
         final file = File(match.imagePath!);
         if (file.existsSync()) {
@@ -76,6 +83,30 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
   void dispose() {
     _gameNameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openLocationPicker() async {
+    final result = await LocationPickerDialog.show(
+      context: context,
+      initialLatitude: _latitude,
+      initialLongitude: _longitude,
+    );
+
+    if (result != null) {
+      setState(() {
+        if (result.isDeleted) {
+          _latitude = null;
+          _longitude = null;
+          _useLocation = false;
+        } else {
+          _latitude = result.latitude;
+          _longitude = result.longitude;
+          if (result.latitude != null && result.longitude != null) {
+            _useLocation = true;
+          }
+        }
+      });
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -231,12 +262,26 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           : [];
       match.playerScores = scores;
 
-      // Automatically and silently get GPS location when saving a match
-      if (widget.existingMatch == null || (match.latitude == null && match.longitude == null)) {
-        final position = await LocationService.getCurrentLocation();
-        if (position != null) {
-          match.latitude = position.latitude;
-          match.longitude = position.longitude;
+      // Location handling:
+      if (!_useLocation) {
+        match.latitude = null;
+        match.longitude = null;
+      } else if (widget.existingMatch != null) {
+        // When editing: do NOT re-fetch GPS! Strictly preserve user's edited or existing location
+        match.latitude = _latitude;
+        match.longitude = _longitude;
+      } else {
+        // When creating a new match:
+        if (_latitude != null && _longitude != null) {
+          match.latitude = _latitude;
+          match.longitude = _longitude;
+        } else {
+          // Automatically and silently get GPS location when saving a new match
+          final position = await LocationService.getCurrentLocation();
+          if (position != null) {
+            match.latitude = position.latitude;
+            match.longitude = position.longitude;
+          }
         }
       }
 
@@ -264,6 +309,9 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
             _playerEntries.add(_PlayerEntryForm());
             _selectedImages.clear();
             _date = DateTime.now();
+            _useLocation = true;
+            _latitude = null;
+            _longitude = null;
           });
         }
       }
@@ -361,6 +409,142 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                       setState(() => _date = picked);
                     }
                   },
+                ),
+                const SizedBox(height: 16),
+
+                // Location Section with Toggle Switch
+                Card(
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        secondary: Icon(
+                          _useLocation ? Icons.location_on : Icons.location_off_outlined,
+                          color: _useLocation
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        title: Text(
+                          l10n.useLocation,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          _useLocation
+                              ? (widget.existingMatch == null && _latitude == null
+                                  ? l10n.locationAutoDetectedOnSave
+                                  : l10n.locationOptional)
+                              : l10n.locationDisabledSubtitle,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        value: _useLocation,
+                        onChanged: (bool val) {
+                          setState(() {
+                            _useLocation = val;
+                            if (!val) {
+                              _latitude = null;
+                              _longitude = null;
+                            }
+                          });
+                        },
+                      ),
+                      if (_useLocation && (_latitude != null && _longitude != null || widget.existingMatch != null)) ...[
+                        const Divider(height: 1),
+                        ListTile(
+                          dense: true,
+                          leading: Icon(
+                            _latitude != null && _longitude != null
+                                ? Icons.place
+                                : Icons.place_outlined,
+                            color: _latitude != null && _longitude != null
+                                ? theme.colorScheme.primary
+                                : null,
+                            size: 22,
+                          ),
+                          title: _latitude != null && _longitude != null
+                              ? FutureBuilder<String>(
+                                  future: LocationService.getAddress(_latitude!, _longitude!),
+                                  builder: (context, snapshot) {
+                                    final addressText = snapshot.data ??
+                                        '${_latitude!.toStringAsFixed(4)}°, ${_longitude!.toStringAsFixed(4)}°';
+                                    return Text(
+                                      addressText,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Text(
+                                  l10n.noLocation,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                          subtitle: _latitude != null && _longitude != null
+                              ? Text(
+                                  '${_latitude!.toStringAsFixed(4)}°, ${_longitude!.toStringAsFixed(4)}°',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                )
+                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_latitude != null && _longitude != null) ...[
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined),
+                                  tooltip: l10n.editLocation,
+                                  onPressed: _openLocationPicker,
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                                  tooltip: l10n.deleteLocation,
+                                  onPressed: () {
+                                    setState(() {
+                                      _latitude = null;
+                                      _longitude = null;
+                                    });
+                                  },
+                                ),
+                              ] else ...[
+                                IconButton(
+                                  icon: const Icon(Icons.add_location_alt_outlined),
+                                  tooltip: l10n.addLocation,
+                                  onPressed: _openLocationPicker,
+                                ),
+                              ],
+                            ],
+                          ),
+                          onTap: _openLocationPicker,
+                        ),
+                      ] else if (_useLocation && widget.existingMatch == null && _latitude == null) ...[
+                        const Divider(height: 1),
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.edit_location_outlined, size: 22),
+                          title: Text(
+                            l10n.searchAddressOrCity,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: _openLocationPicker,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
 

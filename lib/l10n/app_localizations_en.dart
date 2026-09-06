@@ -553,4 +553,66 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notEnoughChartData =>
       'Not enough data for a chart (at least 2 matches with scores needed)';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get locationOptional => 'Location (optional)';
+
+  @override
+  String get noLocation => 'No location set';
+
+  @override
+  String get locationAutoDetectedOnSave =>
+      'Will be detected automatically on save';
+
+  @override
+  String get editLocation => 'Edit location';
+
+  @override
+  String get addLocation => 'Add location';
+
+  @override
+  String get deleteLocation => 'Delete location';
+
+  @override
+  String get useCurrentLocation => 'Use current location';
+
+  @override
+  String get searchAddressOrCity => 'Search address or place';
+
+  @override
+  String get searchAddressHint => 'e.g. London, Times Square...';
+
+  @override
+  String get manualCoordinates => 'Enter coordinates manually';
+
+  @override
+  String get latitudeLabel => 'Latitude';
+
+  @override
+  String get longitudeLabel => 'Longitude';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get searchingLocation => 'Searching location...';
+
+  @override
+  String get locationNotFound => 'No location found';
+
+  @override
+  String get locationPermissionDenied =>
+      'Location access unavailable or denied';
+
+  @override
+  String get invalidCoordinates => 'Invalid coordinates';
+
+  @override
+  String get useLocation => 'Use location';
+
+  @override
+  String get locationDisabledSubtitle => 'No location for this match';
 }

@@ -554,4 +554,66 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get notEnoughChartData =>
       'Nicht genug Daten für ein Diagramm (min. 2 Partien mit Punkten nötig)';
+
+  @override
+  String get location => 'Standort';
+
+  @override
+  String get locationOptional => 'Standort (optional)';
+
+  @override
+  String get noLocation => 'Kein Standort festgelegt';
+
+  @override
+  String get locationAutoDetectedOnSave =>
+      'Wird beim Speichern automatisch erfasst';
+
+  @override
+  String get editLocation => 'Standort bearbeiten';
+
+  @override
+  String get addLocation => 'Standort hinzufügen';
+
+  @override
+  String get deleteLocation => 'Standort löschen';
+
+  @override
+  String get useCurrentLocation => 'Aktuellen Standort verwenden';
+
+  @override
+  String get searchAddressOrCity => 'Adresse oder Ort suchen';
+
+  @override
+  String get searchAddressHint => 'z. B. Berlin, Marienplatz...';
+
+  @override
+  String get manualCoordinates => 'Koordinaten manuell eingeben';
+
+  @override
+  String get latitudeLabel => 'Breitengrad (Latitude)';
+
+  @override
+  String get longitudeLabel => 'Längengrad (Longitude)';
+
+  @override
+  String get apply => 'Übernehmen';
+
+  @override
+  String get searchingLocation => 'Standort wird gesucht...';
+
+  @override
+  String get locationNotFound => 'Kein Standort gefunden';
+
+  @override
+  String get locationPermissionDenied =>
+      'Standortzugriff nicht möglich oder verweigert';
+
+  @override
+  String get invalidCoordinates => 'Ungültige Koordinaten';
+
+  @override
+  String get useLocation => 'Standort verwenden';
+
+  @override
+  String get locationDisabledSubtitle => 'Kein Standort für diese Partie';
 }

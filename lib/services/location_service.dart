@@ -78,6 +78,25 @@ class LocationService {
     return fallback;
   }
 
+  /// Searches for coordinates given an address or place name.
+  /// Returns a record with latitude, longitude, and formatted address, or null if not found.
+  static Future<({double latitude, double longitude, String address})?> searchCoordinatesFromAddress(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return null;
+
+    try {
+      final locations = await locationFromAddress(trimmed);
+      if (locations.isNotEmpty) {
+        final loc = locations.first;
+        final address = await getAddress(loc.latitude, loc.longitude);
+        return (latitude: loc.latitude, longitude: loc.longitude, address: address);
+      }
+    } catch (e) {
+      debugPrint('Geocoding searchCoordinatesFromAddress error: $e');
+    }
+    return null;
+  }
+
   /// Opens the location in Google Maps / Apple Maps / Map App.
   static Future<void> openMap(double latitude, double longitude) async {
     final geoUri = Uri.parse('geo:$latitude,$longitude?q=$latitude,$longitude');

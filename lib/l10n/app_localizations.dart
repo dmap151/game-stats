@@ -1009,6 +1009,126 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Nicht genug Daten für ein Diagramm (min. 2 Partien mit Punkten nötig)'**
   String get notEnoughChartData;
+
+  /// No description provided for @location.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort'**
+  String get location;
+
+  /// No description provided for @locationOptional.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort (optional)'**
+  String get locationOptional;
+
+  /// No description provided for @noLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Standort festgelegt'**
+  String get noLocation;
+
+  /// No description provided for @locationAutoDetectedOnSave.
+  ///
+  /// In de, this message translates to:
+  /// **'Wird beim Speichern automatisch erfasst'**
+  String get locationAutoDetectedOnSave;
+
+  /// No description provided for @editLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort bearbeiten'**
+  String get editLocation;
+
+  /// No description provided for @addLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort hinzufügen'**
+  String get addLocation;
+
+  /// No description provided for @deleteLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort löschen'**
+  String get deleteLocation;
+
+  /// No description provided for @useCurrentLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Aktuellen Standort verwenden'**
+  String get useCurrentLocation;
+
+  /// No description provided for @searchAddressOrCity.
+  ///
+  /// In de, this message translates to:
+  /// **'Adresse oder Ort suchen'**
+  String get searchAddressOrCity;
+
+  /// No description provided for @searchAddressHint.
+  ///
+  /// In de, this message translates to:
+  /// **'z. B. Berlin, Marienplatz...'**
+  String get searchAddressHint;
+
+  /// No description provided for @manualCoordinates.
+  ///
+  /// In de, this message translates to:
+  /// **'Koordinaten manuell eingeben'**
+  String get manualCoordinates;
+
+  /// No description provided for @latitudeLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Breitengrad (Latitude)'**
+  String get latitudeLabel;
+
+  /// No description provided for @longitudeLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Längengrad (Longitude)'**
+  String get longitudeLabel;
+
+  /// No description provided for @apply.
+  ///
+  /// In de, this message translates to:
+  /// **'Übernehmen'**
+  String get apply;
+
+  /// No description provided for @searchingLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort wird gesucht...'**
+  String get searchingLocation;
+
+  /// No description provided for @locationNotFound.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Standort gefunden'**
+  String get locationNotFound;
+
+  /// No description provided for @locationPermissionDenied.
+  ///
+  /// In de, this message translates to:
+  /// **'Standortzugriff nicht möglich oder verweigert'**
+  String get locationPermissionDenied;
+
+  /// No description provided for @invalidCoordinates.
+  ///
+  /// In de, this message translates to:
+  /// **'Ungültige Koordinaten'**
+  String get invalidCoordinates;
+
+  /// No description provided for @useLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort verwenden'**
+  String get useLocation;
+
+  /// No description provided for @locationDisabledSubtitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Standort für diese Partie'**
+  String get locationDisabledSubtitle;
 }
 
 class _AppLocalizationsDelegate
