@@ -194,7 +194,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
     }
   }
 
-  void _saveMatch(List<Player> availablePlayers) async {
+  void _saveMatch() async {
     final l10n = context.l10n;
     if (_formKey.currentState!.validate()) {
       if (_playerEntries.any((p) => (p.playerName == null || p.playerName!.trim().isEmpty))) {
@@ -343,6 +343,23 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Center(
+                child: PrimaryButton(
+                  label: widget.existingMatch == null
+                      ? l10n.save
+                      : l10n.saveChanges,
+                  icon: Icons.save_outlined,
+                  isCompact: true,
+                  onPressed: (playersAsync.value?.isNotEmpty ?? false)
+                      ? _saveMatch
+                      : null,
+                ),
+              ),
+            ),
+          ],
         ),
       body: playersAsync.when(
         data: (players) {
@@ -652,7 +669,7 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
                       ? l10n.save
                       : l10n.saveChanges,
                   icon: Icons.save_outlined,
-                  onPressed: () => _saveMatch(players),
+                  onPressed: _saveMatch,
                 ),
               ],
             ),
