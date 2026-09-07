@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLibrary => 'Library';
 
   @override
+  String get navCompare => 'Duels';
+
+  @override
   String get globalStatistics => 'Global Statistics';
 
   @override

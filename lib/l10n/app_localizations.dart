@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Bibliothek'**
   String get navLibrary;
 
+  /// No description provided for @navCompare.
+  ///
+  /// In de, this message translates to:
+  /// **'Duelle'**
+  String get navCompare;
+
   /// No description provided for @globalStatistics.
   ///
   /// In de, this message translates to:
