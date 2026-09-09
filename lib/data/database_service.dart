@@ -145,6 +145,49 @@ class DatabaseService {
     });
   }
 
+  /// Finds and removes duplicate match records created by sync or multiple imports.
+  /// Matches are considered duplicates if they have the same game name,
+  /// identical player scores, and occurred within 3 hours (timezone shifts).
+  Future<int> deduplicateMatchRecords() async {
+    final matches = await getAllMatchRecords();
+    final toDelete = <int>[];
+    final kept = <MatchRecord>[];
+
+    for (final match in matches) {
+      bool isDuplicate = false;
+      for (final k in kept) {
+        final sameGame = k.game.value?.name == match.game.value?.name;
+        final dateDiffMinutes = (k.date.difference(match.date)).abs().inMinutes;
+        final sameTime = dateDiffMinutes <= 180;
+
+        if (sameGame && sameTime) {
+          final s1 = k.playerScores.map((s) => '${s.playerName}:${s.score}:${s.placement}').toList()..sort();
+          final s2 = match.playerScores.map((s) => '${s.playerName}:${s.score}:${s.placement}').toList()..sort();
+          if (s1.join(',') == s2.join(',')) {
+            isDuplicate = true;
+            break;
+          }
+        }
+      }
+
+      if (isDuplicate) {
+        toDelete.add(match.id);
+      } else {
+        kept.add(match);
+      }
+    }
+
+    if (toDelete.isNotEmpty) {
+      await isar.writeTxn(() async {
+        for (final id in toDelete) {
+          await isar.matchRecords.delete(id);
+        }
+      });
+    }
+
+    return toDelete.length;
+  }
+
   /// Clears all tables in the database (Game, MatchRecord, Player).
   Future<void> clearAllData() async {
     await isar.writeTxn(() async {

@@ -6,18 +6,27 @@ import 'l10n/l10n_extension.dart';
 import 'theme/app_theme.dart';
 import 'data/database_service.dart';
 import 'providers/providers.dart';
+import 'services/supabase_service.dart';
 
 import 'ui/screens/dashboard_screen.dart';
 import 'ui/screens/game_library_screen.dart';
 import 'ui/screens/match_entry_screen.dart';
 import 'ui/screens/players_screen.dart';
-import 'ui/screens/compare_players_screen.dart';
+import 'ui/screens/account_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   final dbService = DatabaseService();
   await dbService.init();
+  await dbService.deduplicateMatchRecords();
+
+  // Initialize Supabase client
+  try {
+    await SupabaseService.initialize();
+  } catch (e) {
+    debugPrint('Supabase initialization error: $e');
+  }
 
   runApp(
     ProviderScope(
@@ -65,7 +74,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     DashboardScreen(),
     GameLibraryScreen(),
     PlayersScreen(),
-    ComparePlayersScreen(),
+    AccountScreen(),
   ];
 
   void _openMatchEntry() {
@@ -141,9 +150,9 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
           _buildNavItem(
             index: 3,
-            icon: Icons.query_stats_outlined,
-            activeIcon: Icons.query_stats_rounded,
-            label: l10n.navCompare,
+            icon: Icons.person_outline_rounded,
+            activeIcon: Icons.person_rounded,
+            label: l10n.navAccount,
             theme: theme,
           ),
         ],
