@@ -118,9 +118,11 @@ CREATE INDEX IF NOT EXISTS idx_friendships_user_status ON public.friendships(use
 
 -- 5. linked_user_id Spalte in match_player_scores hinzufügen
 ALTER TABLE public.match_player_scores 
-ADD COLUMN IF NOT EXISTS linked_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+ADD COLUMN IF NOT EXISTS linked_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS invitation_status TEXT NOT NULL DEFAULT 'accepted';
 
 CREATE INDEX IF NOT EXISTS idx_match_player_scores_linked_user ON public.match_player_scores(linked_user_id);
+CREATE INDEX IF NOT EXISTS idx_match_player_scores_invitation ON public.match_player_scores(linked_user_id, invitation_status);
 
 -- 6. Row Level Security (RLS) für Profiles & Friendships
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -187,6 +189,7 @@ AS $$
         SELECT 1 FROM public.match_player_scores
         WHERE match_id = p_match_id
         AND linked_user_id = p_user_id
+        AND invitation_status <> 'declined'
     );
 $$;
 
@@ -255,8 +258,37 @@ CREATE POLICY "Users can insert match scores"
 CREATE POLICY "Users can update match scores"
     ON public.match_player_scores FOR UPDATE
     TO authenticated
-    USING (public.get_match_owner(match_id) = auth.uid())
-    WITH CHECK (public.get_match_owner(match_id) = auth.uid());
+    USING (
+        public.get_match_owner(match_id) = auth.uid()
+        OR linked_user_id = auth.uid()
+    )
+    WITH CHECK (
+        public.get_match_owner(match_id) = auth.uid()
+        OR linked_user_id = auth.uid()
+    );
+
+CREATE OR REPLACE FUNCTION public.respond_to_match_invitation(p_score_id UUID, p_status TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_updated INT;
+BEGIN
+    IF p_status NOT IN ('accepted', 'declined') THEN
+        RAISE EXCEPTION 'Invalid status: %', p_status;
+    END IF;
+
+    UPDATE public.match_player_scores
+    SET invitation_status = p_status
+    WHERE id = p_score_id
+      AND linked_user_id = auth.uid();
+      
+    GET DIAGNOSTICS v_updated = ROW_COUNT;
+    RETURN v_updated > 0;
+END;
+$$;
 
 CREATE POLICY "Users can delete match scores"
     ON public.match_player_scores FOR DELETE

@@ -110,6 +110,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         ref.invalidate(friendsListProvider);
         ref.invalidate(incomingFriendRequestsProvider);
         ref.invalidate(outgoingFriendRequestsProvider);
+        ref.invalidate(pendingMatchInvitationsProvider);
 
         // When a user logs in, automatically sync their data from the cloud
         if (next != null) {
@@ -133,7 +134,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     AppLocalizations l10n,
   ) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final incomingRequestsCount = ref.watch(incomingFriendRequestsProvider).value?.length ?? 0;
+    final incomingRequestsCount = ref.watch(incomingFriendRequestsProvider).valueOrNull?.length ?? 0;
+    final pendingInvitationsCount = ref.watch(pendingMatchInvitationsProvider).valueOrNull?.length ?? 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -158,6 +160,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             activeIcon: Icons.dashboard_rounded,
             label: l10n.navDashboard,
             theme: theme,
+            badgeCount: pendingInvitationsCount,
           ),
           _buildNavItem(
             index: 1,

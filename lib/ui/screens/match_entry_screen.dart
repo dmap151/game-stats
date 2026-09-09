@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -317,6 +318,12 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       }
 
       await db.saveMatchRecord(match);
+
+      final currentUser = ref.read(currentUserProvider);
+      if (currentUser != null) {
+        // Automatically sync to Supabase so linked friends receive the invitation
+        unawaited(ref.read(syncProvider.notifier).performSync());
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

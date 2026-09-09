@@ -296,5 +296,16 @@
   "requestPending": "Pending",
   "errorLoadingFriends": "Error loading friends: {error}",
   "incomingRequestsCount": "{count, plural, =1{1 pending request} other{{count} pending requests}}",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "matchInvitationsTitle": "Match Invitations",
+  "matchInvitationsCount": "{count, plural, =1{1 new invitation} other{{count} new invitations}}",
+  "invitedBy": "Recorded by {name}",
+  "matchInvitationAccepted": "Match accepted and added to history!",
+  "matchInvitationDeclined": "Match invitation declined.",
+  "declineMatchInvitationPrompt": "Are you sure you want to decline this match invitation for \"{game}\"?",
+  "yourPlacement": "Your rank: #{rank}",
+  "yourScore": "{score} pts",
+  "acceptMatch": "Accept",
+  "declineMatch": "Decline",
+  "noMatchInvitations": "No open invitations"
 }

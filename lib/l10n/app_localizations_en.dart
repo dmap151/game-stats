@@ -999,4 +999,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get matchInvitationsTitle => 'Match Invitations';
+
+  @override
+  String matchInvitationsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new invitations',
+      one: '1 new invitation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitedBy(Object name) {
+    return 'Recorded by $name';
+  }
+
+  @override
+  String get matchInvitationAccepted => 'Match accepted and added to history!';
+
+  @override
+  String get matchInvitationDeclined => 'Match invitation declined.';
+
+  @override
+  String declineMatchInvitationPrompt(Object game) {
+    return 'Are you sure you want to decline this match invitation for \"$game\"?';
+  }
+
+  @override
+  String yourPlacement(Object rank) {
+    return 'Your rank: #$rank';
+  }
+
+  @override
+  String yourScore(Object score) {
+    return '$score pts';
+  }
+
+  @override
+  String get acceptMatch => 'Accept';
+
+  @override
+  String get declineMatch => 'Decline';
+
+  @override
+  String get noMatchInvitations => 'No open invitations';
 }

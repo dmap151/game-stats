@@ -31,16 +31,16 @@ final myPlayerProvider = StreamProvider<Player?>((ref) {
 });
 
 final incomingFriendRequestsProvider = FutureProvider<List<FriendRequest>>((ref) async {
-  final service = ref.watch(friendsServiceProvider);
   final user = ref.watch(currentUserProvider);
   if (user == null) return [];
+  final service = ref.watch(friendsServiceProvider);
   return await service.getIncomingFriendRequests();
 });
 
 final outgoingFriendRequestsProvider = FutureProvider<List<FriendRequest>>((ref) async {
-  final service = ref.watch(friendsServiceProvider);
   final user = ref.watch(currentUserProvider);
   if (user == null) return [];
+  final service = ref.watch(friendsServiceProvider);
   return await service.getOutgoingFriendRequests();
 });
 

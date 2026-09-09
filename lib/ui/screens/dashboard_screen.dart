@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/game_image_helper.dart';
+import '../widgets/match_invitations_banner.dart';
 import '../widgets/match_preview_card.dart';
 import '../widgets/stat_card.dart';
 import 'game_details_screen.dart';
@@ -111,14 +112,23 @@ class DashboardScreen extends ConsumerWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          Text(
-            l10n.globalStatistics,
-            style: theme.textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 16),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(matchRecordsProvider);
+          ref.invalidate(playerStatisticsProvider);
+          ref.invalidate(pendingMatchInvitationsProvider);
+          await ref.read(pendingMatchInvitationsProvider.future);
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            const MatchInvitationsBanner(),
+            Text(
+              l10n.globalStatistics,
+              style: theme.textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth >= 600) {
@@ -214,6 +224,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

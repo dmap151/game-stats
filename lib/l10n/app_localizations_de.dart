@@ -1005,4 +1005,54 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get refresh => 'Aktualisieren';
+
+  @override
+  String get matchInvitationsTitle => 'Partie-Einladungen';
+
+  @override
+  String matchInvitationsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count neue Einladungen',
+      one: '1 neue Einladung',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitedBy(Object name) {
+    return 'Eingetragen von $name';
+  }
+
+  @override
+  String get matchInvitationAccepted =>
+      'Partie angenommen und zur Historie hinzugefügt!';
+
+  @override
+  String get matchInvitationDeclined => 'Partie-Einladung abgelehnt.';
+
+  @override
+  String declineMatchInvitationPrompt(Object game) {
+    return 'Möchtest du diese Partie-Einladung für \"$game\" wirklich ablehnen?';
+  }
+
+  @override
+  String yourPlacement(Object rank) {
+    return 'Dein Platz: #$rank';
+  }
+
+  @override
+  String yourScore(Object score) {
+    return '$score Punkte';
+  }
+
+  @override
+  String get acceptMatch => 'Annehmen';
+
+  @override
+  String get declineMatch => 'Ablehnen';
+
+  @override
+  String get noMatchInvitations => 'Keine offenen Einladungen';
 }

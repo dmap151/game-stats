@@ -340,6 +340,9 @@ class SyncService {
               }
             }
 
+            final isLinkedFriend = linkedId != null && linkedId != userId;
+            final invitationStatus = isLinkedFriend ? 'pending' : 'accepted';
+
             await _client.from('match_player_scores').insert({
               'match_id': matchId,
               'player_name': score.playerName ?? 'Spieler',
@@ -347,6 +350,7 @@ class SyncService {
               'is_winner': score.placement == 1,
               'rank': score.placement,
               'linked_user_id': linkedId,
+              'invitation_status': invitationStatus,
             });
           }
           count++;
@@ -397,6 +401,21 @@ class SyncService {
       final remote = item as Map<String, dynamic>;
       final remoteLocalId = remote['local_id'] as num?;
       final remoteUserId = remote['user_id'] as String?;
+      final rawScores = (remote['match_player_scores'] as List<dynamic>?) ?? [];
+
+      // If match was created by someone else, only sync if current user has accepted it
+      if (remoteUserId != null && remoteUserId != userId) {
+        final myScore = rawScores.cast<Map<String, dynamic>?>().firstWhere(
+          (s) => s != null && s['linked_user_id'] == userId,
+          orElse: () => null,
+        );
+        final status = myScore?['invitation_status'] as String? ?? 'accepted';
+        if (status != 'accepted') {
+          // Skip pending or declined invitations from automatically inserting into history
+          continue;
+        }
+      }
+
       final remoteDateUtc = DateTime.parse(remote['date'] as String).toUtc();
       final gameName = remote['game_name'] as String;
       final remoteImageUrl = remote['image_url'] as String?;
@@ -474,7 +493,6 @@ class SyncService {
         await _db.saveGame(game);
       }
 
-      final rawScores = (remote['match_player_scores'] as List<dynamic>?) ?? [];
       final scores = <PlayerScore>[];
 
       for (final s in rawScores) {

@@ -1801,6 +1801,72 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Aktualisieren'**
   String get refresh;
+
+  /// No description provided for @matchInvitationsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Partie-Einladungen'**
+  String get matchInvitationsTitle;
+
+  /// No description provided for @matchInvitationsCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 neue Einladung} other{{count} neue Einladungen}}'**
+  String matchInvitationsCount(num count);
+
+  /// No description provided for @invitedBy.
+  ///
+  /// In de, this message translates to:
+  /// **'Eingetragen von {name}'**
+  String invitedBy(Object name);
+
+  /// No description provided for @matchInvitationAccepted.
+  ///
+  /// In de, this message translates to:
+  /// **'Partie angenommen und zur Historie hinzugefügt!'**
+  String get matchInvitationAccepted;
+
+  /// No description provided for @matchInvitationDeclined.
+  ///
+  /// In de, this message translates to:
+  /// **'Partie-Einladung abgelehnt.'**
+  String get matchInvitationDeclined;
+
+  /// No description provided for @declineMatchInvitationPrompt.
+  ///
+  /// In de, this message translates to:
+  /// **'Möchtest du diese Partie-Einladung für \"{game}\" wirklich ablehnen?'**
+  String declineMatchInvitationPrompt(Object game);
+
+  /// No description provided for @yourPlacement.
+  ///
+  /// In de, this message translates to:
+  /// **'Dein Platz: #{rank}'**
+  String yourPlacement(Object rank);
+
+  /// No description provided for @yourScore.
+  ///
+  /// In de, this message translates to:
+  /// **'{score} Punkte'**
+  String yourScore(Object score);
+
+  /// No description provided for @acceptMatch.
+  ///
+  /// In de, this message translates to:
+  /// **'Annehmen'**
+  String get acceptMatch;
+
+  /// No description provided for @declineMatch.
+  ///
+  /// In de, this message translates to:
+  /// **'Ablehnen'**
+  String get declineMatch;
+
+  /// No description provided for @noMatchInvitations.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine offenen Einladungen'**
+  String get noMatchInvitations;
 }
 
 class _AppLocalizationsDelegate

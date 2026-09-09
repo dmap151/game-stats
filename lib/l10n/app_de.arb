@@ -296,5 +296,16 @@
   "requestPending": "Ausstehend",
   "errorLoadingFriends": "Fehler beim Laden der Freunde: {error}",
   "incomingRequestsCount": "{count, plural, =1{1 offene Anfrage} other{{count} offene Anfragen}}",
-  "refresh": "Aktualisieren"
+  "refresh": "Aktualisieren",
+  "matchInvitationsTitle": "Partie-Einladungen",
+  "matchInvitationsCount": "{count, plural, =1{1 neue Einladung} other{{count} neue Einladungen}}",
+  "invitedBy": "Eingetragen von {name}",
+  "matchInvitationAccepted": "Partie angenommen und zur Historie hinzugefügt!",
+  "matchInvitationDeclined": "Partie-Einladung abgelehnt.",
+  "declineMatchInvitationPrompt": "Möchtest du diese Partie-Einladung für \"{game}\" wirklich ablehnen?",
+  "yourPlacement": "Dein Platz: #{rank}",
+  "yourScore": "{score} Punkte",
+  "acceptMatch": "Annehmen",
+  "declineMatch": "Ablehnen",
+  "noMatchInvitations": "Keine offenen Einladungen"
 }
