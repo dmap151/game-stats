@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../services/backup_service.dart';
+import '../../services/sync_service.dart';
+import 'auth_dialog.dart';
 
 class BackupSettingsDialog extends ConsumerStatefulWidget {
   const BackupSettingsDialog({super.key});
@@ -332,6 +334,144 @@ class _BackupSettingsDialogState extends ConsumerState<BackupSettingsDialog> {
     );
   }
 
+  Widget _buildCloudSyncSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final user = ref.watch(currentUserProvider);
+    final syncState = ref.watch(syncProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.cloud_outlined, size: 20, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              'Supabase Cloud',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: user != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          child: Text(
+                            (user.email?.isNotEmpty == true ? user.email![0] : 'U').toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.email ?? 'Angemeldet',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                syncState.lastSyncTime != null
+                                    ? 'Synchr.: ${DateFormat('HH:mm').format(syncState.lastSyncTime!)}'
+                                    : 'Nicht synchronisiert',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: syncState.status == SyncStatus.syncing
+                                ? null
+                                : () => ref.read(syncProvider.notifier).performSync(),
+                            icon: syncState.status == SyncStatus.syncing
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.sync, size: 18),
+                            label: Text(
+                              syncState.status == SyncStatus.syncing
+                                  ? 'Synchronisiere...'
+                                  : 'Sync jetzt',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.logout_rounded, size: 20),
+                          tooltip: 'Abmelden',
+                          onPressed: () async {
+                            await ref.read(supabaseServiceProvider).signOut();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Melde dich an, um deine Daten in der Supabase Cloud zu sichern.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) => const AuthDialog(),
+                          );
+                        },
+                        icon: const Icon(Icons.login_rounded, size: 18),
+                        label: const Text('Anmelden / Registrieren'),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -350,6 +490,10 @@ class _BackupSettingsDialogState extends ConsumerState<BackupSettingsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildCloudSyncSection(context),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 12),
             _buildThemeSelector(context),
             const SizedBox(height: 16),
             _buildLanguageSelector(context),

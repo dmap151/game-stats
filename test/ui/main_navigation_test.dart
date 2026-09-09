@@ -39,7 +39,7 @@ void main() {
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Bibliothek'), findsOneWidget);
     expect(find.text('Spieler'), findsWidgets);
-    expect(find.text('Duelle'), findsOneWidget);
+    expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
 
     // Verify the prominent center "+" action button
     final plusButton = find.byIcon(Icons.add_rounded);
@@ -52,11 +52,11 @@ void main() {
     // Verify library is displayed
     expect(find.text('Spiele-Bibliothek'), findsOneWidget);
 
-    // Tap on the "Duelle" tab
-    await tester.tap(find.text('Duelle'));
+    // Tap on the "Account" tab
+    await tester.tap(find.byIcon(Icons.person_outline_rounded));
     await tester.pumpAndSettle();
 
-    expect(find.text('Spieler Vergleich'), findsOneWidget);
+    expect(find.text('Konto & Cloud-Sync'), findsOneWidget);
 
     // Tap center "+" button to verify it launches MatchEntryScreen
     await tester.tap(plusButton);

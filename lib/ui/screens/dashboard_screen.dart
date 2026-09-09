@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/providers.dart';
 import '../../utils/game_image_helper.dart';
-import '../widgets/backup_settings_dialog.dart';
 import '../widgets/match_preview_card.dart';
 import '../widgets/stat_card.dart';
 import 'game_details_screen.dart';
@@ -111,18 +110,6 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(l10n.navDashboard),
         elevation: 0,
         backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: l10n.manageDataTooltip,
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: (context) => const BackupSettingsDialog(),
-              );
-            },
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

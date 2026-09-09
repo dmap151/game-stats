@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'Duelle'**
   String get navCompare;
 
+  /// No description provided for @navAccount.
+  ///
+  /// In de, this message translates to:
+  /// **'Account'**
+  String get navAccount;
+
   /// No description provided for @globalStatistics.
   ///
   /// In de, this message translates to:

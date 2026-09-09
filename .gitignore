@@ -46,3 +46,5 @@ app.*.map.json
 
 # Local per-developer device id for `task ios`
 /DEVICE_ID
+
+.env
