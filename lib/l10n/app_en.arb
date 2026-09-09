@@ -281,5 +281,20 @@
   "googleSignInSuccessMessage": "Successfully signed in with Google!",
   "continueWithGoogle": "Continue with Google",
   "orDivider": "OR",
-  "continueWithoutSignIn": "Continue without signing in"
+  "continueWithoutSignIn": "Continue without signing in",
+  "friendRequestsTitle": "Friend Requests",
+  "incomingRequests": "Incoming Requests",
+  "outgoingRequests": "Sent Requests",
+  "accept": "Accept",
+  "decline": "Decline",
+  "friendRequestAccepted": "Friend request accepted!",
+  "friendRequestDeclined": "Friend request declined.",
+  "friendRequestSentSuccess": "Friend request sent!",
+  "friendRequestAlreadySent": "Friend request already sent.",
+  "alreadyFriends": "You are already friends!",
+  "cancelRequest": "Cancel request",
+  "requestPending": "Pending",
+  "errorLoadingFriends": "Error loading friends: {error}",
+  "incomingRequestsCount": "{count, plural, =1{1 pending request} other{{count} pending requests}}",
+  "refresh": "Refresh"
 }

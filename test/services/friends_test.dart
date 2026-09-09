@@ -90,5 +90,28 @@ void main() {
       expect(player.linkedUserId, isNull);
       expect(player.friendCode, isNull);
     });
+
+    test('FriendRequest model instantiates properly with properties and profile', () {
+      const profile = FriendProfile(
+        id: 'user-789',
+        displayName: 'Charlie',
+        friendCode: '#CHAR-3344',
+      );
+      final request = FriendRequest(
+        id: 'friendship-uuid',
+        userId: 'user-789',
+        friendId: 'my-user-id',
+        status: 'pending',
+        createdAt: DateTime(2026, 9, 10, 10, 0),
+        profile: profile,
+      );
+
+      expect(request.id, 'friendship-uuid');
+      expect(request.userId, 'user-789');
+      expect(request.friendId, 'my-user-id');
+      expect(request.status, 'pending');
+      expect(request.profile.displayName, 'Charlie');
+      expect(request.profile.friendCode, '#CHAR-3344');
+    });
   });
 }

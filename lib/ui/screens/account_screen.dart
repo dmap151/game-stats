@@ -31,6 +31,17 @@ class AccountScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: l10n.refresh,
+            onPressed: () {
+              ref.invalidate(myProfileProvider);
+              ref.invalidate(friendsListProvider);
+              ref.invalidate(incomingFriendRequestsProvider);
+              ref.invalidate(outgoingFriendRequestsProvider);
+              ref.invalidate(myPlayerProvider);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: l10n.manageDataTooltip,
             onPressed: () {
@@ -42,17 +53,28 @@ class AccountScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        children: [
-          if (user != null)
-            _buildLoggedInContent(context, ref, theme, user, syncState)
-          else
-            _buildLoggedOutContent(context, ref, theme),
-          const SizedBox(height: 20),
-          _buildDuelsCard(context, theme),
-          const SizedBox(height: 32),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(myProfileProvider);
+          ref.invalidate(friendsListProvider);
+          ref.invalidate(incomingFriendRequestsProvider);
+          ref.invalidate(outgoingFriendRequestsProvider);
+          ref.invalidate(myPlayerProvider);
+          await ref.read(incomingFriendRequestsProvider.future);
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          children: [
+            if (user != null)
+              _buildLoggedInContent(context, ref, theme, user, syncState)
+            else
+              _buildLoggedOutContent(context, ref, theme),
+            const SizedBox(height: 20),
+            _buildDuelsCard(context, theme),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
@@ -74,6 +96,8 @@ class AccountScreen extends ConsumerWidget {
     final myProfileAsync = ref.watch(myProfileProvider);
     final myPlayerAsync = ref.watch(myPlayerProvider);
     final friendsAsync = ref.watch(friendsListProvider);
+    final incomingRequestsAsync = ref.watch(incomingFriendRequestsProvider);
+    final outgoingRequestsAsync = ref.watch(outgoingFriendRequestsProvider);
     final allPlayers = ref.watch(playersProvider).value ?? [];
 
     return Column(
@@ -372,6 +396,205 @@ class AccountScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 14),
+              incomingRequestsAsync.when(
+                data: (requests) {
+                  if (requests.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person_add_rounded,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.incomingRequests,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${requests.length}',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ...requests.map((req) {
+                          final profile = req.profile;
+                          final name = profile.displayName.isNotEmpty
+                              ? profile.displayName
+                              : 'User';
+                          final code = profile.friendCode;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: theme.colorScheme.primaryContainer,
+                                  child: Text(
+                                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: theme.textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (code.isNotEmpty)
+                                        Text(
+                                          code,
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                FilledButton.tonal(
+                                  onPressed: () async {
+                                    try {
+                                      await ref.read(friendsServiceProvider).acceptFriendRequest(req.id);
+                                      ref.invalidate(incomingFriendRequestsProvider);
+                                      ref.invalidate(friendsListProvider);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(l10n.friendRequestAccepted),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(e.toString()),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  ),
+                                  child: Text(l10n.accept),
+                                ),
+                                const SizedBox(width: 6),
+                                IconButton(
+                                  icon: const Icon(Icons.close_rounded, size: 20),
+                                  color: theme.colorScheme.error,
+                                  tooltip: l10n.decline,
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () async {
+                                    try {
+                                      await ref.read(friendsServiceProvider).declineFriendRequest(req.id);
+                                      ref.invalidate(incomingFriendRequestsProvider);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(l10n.friendRequestDeclined),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(e.toString()),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+                error: (err, _) => Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline_rounded, color: theme.colorScheme.error, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          err.toString(),
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               friendsAsync.when(
                 data: (friends) {
                   if (friends.isEmpty) {
@@ -543,9 +766,107 @@ class AccountScreen extends ConsumerWidget {
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, _) => Text(
-                  'Fehler beim Laden der Freunde: $err',
+                  l10n.errorLoadingFriends(err.toString()),
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
+              ),
+              outgoingRequestsAsync.when(
+                data: (requests) {
+                  if (requests.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(top: 14),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.outbox_rounded,
+                              size: 16,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.outgoingRequests,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...requests.map((req) {
+                          final profile = req.profile;
+                          final name = profile.displayName.isNotEmpty
+                              ? profile.displayName
+                              : 'User';
+                          final code = profile.friendCode;
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                                  child: Text(
+                                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    name + (code.isNotEmpty ? ' ($code)' : ''),
+                                    style: theme.textTheme.bodySmall,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    l10n.requestPending,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close_rounded, size: 16),
+                                  tooltip: l10n.cancelRequest,
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () async {
+                                    await ref.read(friendsServiceProvider).declineFriendRequest(req.id);
+                                    ref.invalidate(outgoingFriendRequestsProvider);
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
             ],
           ),
@@ -854,14 +1175,19 @@ class AccountScreen extends ConsumerWidget {
                             return;
                           }
 
-                          await friendsService.addFriend(found.id);
+                          final result = await friendsService.sendFriendRequest(found.id);
                           ref.invalidate(friendsListProvider);
+                          ref.invalidate(incomingFriendRequestsProvider);
+                          ref.invalidate(outgoingFriendRequestsProvider);
 
                           if (dialogCtx.mounted) {
                             Navigator.pop(dialogCtx);
+                            final message = result == 'auto_accepted'
+                                ? l10n.friendAddedSuccess
+                                : l10n.friendRequestSentSuccess;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.friendAddedSuccess),
+                                content: Text(message),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -869,7 +1195,14 @@ class AccountScreen extends ConsumerWidget {
                         } catch (e) {
                           setDialogState(() {
                             isLoading = false;
-                            errorText = e.toString().replaceAll('Exception: ', '');
+                            final err = e.toString().replaceAll('Exception: ', '');
+                            if (err == 'already_friends') {
+                              errorText = l10n.alreadyFriends;
+                            } else if (err == 'already_requested') {
+                              errorText = l10n.friendRequestAlreadySent;
+                            } else {
+                              errorText = err;
+                            }
                           });
                         }
                       },

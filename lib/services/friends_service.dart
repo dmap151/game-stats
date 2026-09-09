@@ -25,6 +25,24 @@ class FriendProfile {
   }
 }
 
+class FriendRequest {
+  final String id;
+  final String userId;
+  final String friendId;
+  final String status;
+  final DateTime createdAt;
+  final FriendProfile profile;
+
+  const FriendRequest({
+    required this.id,
+    required this.userId,
+    required this.friendId,
+    required this.status,
+    required this.createdAt,
+    required this.profile,
+  });
+}
+
 class FriendsService {
   final SupabaseService _supabase;
 
@@ -98,36 +116,173 @@ class FriendsService {
     return FriendProfile.fromMap(data);
   }
 
-  /// Adds a friend by creating a friendship entry.
-  Future<void> addFriend(String friendUserId) async {
+  /// Sends a friend request with 'pending' status.
+  /// Returns 'auto_accepted' if a reciprocal request was already pending,
+  /// or 'pending' if a new request was created.
+  Future<String> sendFriendRequest(String friendUserId) async {
     final user = _supabase.currentUser;
-    if (user == null) throw Exception('Nicht angemeldet.');
+    if (user == null) throw Exception('not_authenticated');
     if (user.id == friendUserId) {
-      throw Exception('Du kannst dich nicht selbst als Freund hinzufügen.');
+      throw Exception('self_request');
     }
 
-    await _client.from('friendships').upsert({
+    final List<dynamic> existing = await _client
+        .from('friendships')
+        .select()
+        .or('and(user_id.eq.${user.id},friend_id.eq.$friendUserId),and(user_id.eq.$friendUserId,friend_id.eq.${user.id})');
+
+    if (existing.isNotEmpty) {
+      final rel = existing.first as Map<String, dynamic>;
+      final status = rel['status'] as String;
+      final senderId = rel['user_id'] as String;
+
+      if (status == 'accepted') {
+        throw Exception('already_friends');
+      }
+      if (senderId == user.id) {
+        throw Exception('already_requested');
+      } else {
+        // Reciprocal request exists -> automatically accept
+        await acceptFriendRequest(rel['id'] as String);
+        return 'auto_accepted';
+      }
+    }
+
+    await _client.from('friendships').insert({
       'user_id': user.id,
       'friend_id': friendUserId,
-      'status': 'accepted',
+      'status': 'pending',
     });
+    return 'pending';
   }
 
-  /// Retrieves the list of all friends for the current user.
+  /// Alias for sendFriendRequest for backward compatibility.
+  Future<void> addFriend(String friendUserId) async {
+    await sendFriendRequest(friendUserId);
+  }
+
+  /// Accepts a pending incoming friend request.
+  Future<void> acceptFriendRequest(String friendshipId) async {
+    final user = _supabase.currentUser;
+    if (user == null) throw Exception('not_authenticated');
+    await _client
+        .from('friendships')
+        .update({'status': 'accepted'})
+        .eq('id', friendshipId);
+  }
+
+  /// Declines or cancels a friend request.
+  Future<void> declineFriendRequest(String friendshipId) async {
+    final user = _supabase.currentUser;
+    if (user == null) throw Exception('not_authenticated');
+    await _client
+        .from('friendships')
+        .delete()
+        .eq('id', friendshipId);
+  }
+
+  /// Retrieves pending friend requests received by the current user.
+  Future<List<FriendRequest>> getIncomingFriendRequests() async {
+    final user = _supabase.currentUser;
+    if (user == null) return [];
+
+    final rawRows = await _client
+        .from('friendships')
+        .select()
+        .eq('friend_id', user.id)
+        .eq('status', 'pending');
+    final rows = (rawRows as List).cast<Map<String, dynamic>>();
+
+    if (rows.isEmpty) return [];
+
+    final senderIds = rows.map((r) => r['user_id'] as String).toSet().toList();
+    final rawProfiles = await _client
+        .from('profiles')
+        .select()
+        .inFilter('id', senderIds);
+    final profilesData = (rawProfiles as List).cast<Map<String, dynamic>>();
+
+    final profilesMap = {
+      for (final p in profilesData)
+        p['id'] as String: FriendProfile.fromMap(p)
+    };
+
+    final results = <FriendRequest>[];
+    for (final r in rows) {
+      final senderId = r['user_id'] as String;
+      final profile = profilesMap[senderId] ??
+          FriendProfile(id: senderId, displayName: 'Spieler', friendCode: '');
+      results.add(FriendRequest(
+        id: r['id'] as String,
+        userId: senderId,
+        friendId: r['friend_id'] as String,
+        status: r['status'] as String,
+        createdAt: DateTime.tryParse(r['created_at'] as String? ?? '') ?? DateTime.now(),
+        profile: profile,
+      ));
+    }
+    return results;
+  }
+
+  /// Retrieves pending friend requests sent by the current user.
+  Future<List<FriendRequest>> getOutgoingFriendRequests() async {
+    final user = _supabase.currentUser;
+    if (user == null) return [];
+
+    final rawRows = await _client
+        .from('friendships')
+        .select()
+        .eq('user_id', user.id)
+        .eq('status', 'pending');
+    final rows = (rawRows as List).cast<Map<String, dynamic>>();
+
+    if (rows.isEmpty) return [];
+
+    final recipientIds = rows.map((r) => r['friend_id'] as String).toSet().toList();
+    final rawProfiles = await _client
+        .from('profiles')
+        .select()
+        .inFilter('id', recipientIds);
+    final profilesData = (rawProfiles as List).cast<Map<String, dynamic>>();
+
+    final profilesMap = {
+      for (final p in profilesData)
+        p['id'] as String: FriendProfile.fromMap(p)
+    };
+
+    final results = <FriendRequest>[];
+    for (final r in rows) {
+      final recipientId = r['friend_id'] as String;
+      final profile = profilesMap[recipientId] ??
+          FriendProfile(id: recipientId, displayName: 'Spieler', friendCode: '');
+      results.add(FriendRequest(
+        id: r['id'] as String,
+        userId: r['user_id'] as String,
+        friendId: recipientId,
+        status: r['status'] as String,
+        createdAt: DateTime.tryParse(r['created_at'] as String? ?? '') ?? DateTime.now(),
+        profile: profile,
+      ));
+    }
+    return results;
+  }
+
+  /// Retrieves the list of accepted friends for the current user.
   Future<List<FriendProfile>> getFriends() async {
     final user = _supabase.currentUser;
     if (user == null) return [];
 
-    // Query friendships where user is either user_id or friend_id
     final List<dynamic> sent = await _client
         .from('friendships')
         .select('friend_id')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('status', 'accepted');
 
     final List<dynamic> received = await _client
         .from('friendships')
         .select('user_id')
-        .eq('friend_id', user.id);
+        .eq('friend_id', user.id)
+        .eq('status', 'accepted');
 
     final friendIds = <String>{};
     for (final s in sent) {
@@ -142,14 +297,14 @@ class FriendsService {
     final List<dynamic> profilesData = await _client
         .from('profiles')
         .select()
-        .filter('id', 'in', friendIds.toList());
+        .inFilter('id', friendIds.toList());
 
     return profilesData
         .map((p) => FriendProfile.fromMap(p as Map<String, dynamic>))
         .toList();
   }
 
-  /// Removes a friendship.
+  /// Removes a friendship or request.
   Future<void> removeFriend(String friendUserId) async {
     final user = _supabase.currentUser;
     if (user == null) return;

@@ -949,4 +949,60 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get continueWithoutSignIn => 'Ohne Anmeldung fortfahren';
+
+  @override
+  String get friendRequestsTitle => 'Freundschaftsanfragen';
+
+  @override
+  String get incomingRequests => 'Eingehende Anfragen';
+
+  @override
+  String get outgoingRequests => 'Gesendete Anfragen';
+
+  @override
+  String get accept => 'Annehmen';
+
+  @override
+  String get decline => 'Ablehnen';
+
+  @override
+  String get friendRequestAccepted => 'Freundschaftsanfrage angenommen!';
+
+  @override
+  String get friendRequestDeclined => 'Freundschaftsanfrage abgelehnt.';
+
+  @override
+  String get friendRequestSentSuccess => 'Freundschaftsanfrage gesendet!';
+
+  @override
+  String get friendRequestAlreadySent =>
+      'Freundschaftsanfrage bereits gesendet.';
+
+  @override
+  String get alreadyFriends => 'Ihr seid bereits befreundet!';
+
+  @override
+  String get cancelRequest => 'Anfrage zurückziehen';
+
+  @override
+  String get requestPending => 'Ausstehend';
+
+  @override
+  String errorLoadingFriends(Object error) {
+    return 'Fehler beim Laden der Freunde: $error';
+  }
+
+  @override
+  String incomingRequestsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count offene Anfragen',
+      one: '1 offene Anfrage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get refresh => 'Aktualisieren';
 }

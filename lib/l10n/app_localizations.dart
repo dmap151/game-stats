@@ -1711,6 +1711,96 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Ohne Anmeldung fortfahren'**
   String get continueWithoutSignIn;
+
+  /// No description provided for @friendRequestsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Freundschaftsanfragen'**
+  String get friendRequestsTitle;
+
+  /// No description provided for @incomingRequests.
+  ///
+  /// In de, this message translates to:
+  /// **'Eingehende Anfragen'**
+  String get incomingRequests;
+
+  /// No description provided for @outgoingRequests.
+  ///
+  /// In de, this message translates to:
+  /// **'Gesendete Anfragen'**
+  String get outgoingRequests;
+
+  /// No description provided for @accept.
+  ///
+  /// In de, this message translates to:
+  /// **'Annehmen'**
+  String get accept;
+
+  /// No description provided for @decline.
+  ///
+  /// In de, this message translates to:
+  /// **'Ablehnen'**
+  String get decline;
+
+  /// No description provided for @friendRequestAccepted.
+  ///
+  /// In de, this message translates to:
+  /// **'Freundschaftsanfrage angenommen!'**
+  String get friendRequestAccepted;
+
+  /// No description provided for @friendRequestDeclined.
+  ///
+  /// In de, this message translates to:
+  /// **'Freundschaftsanfrage abgelehnt.'**
+  String get friendRequestDeclined;
+
+  /// No description provided for @friendRequestSentSuccess.
+  ///
+  /// In de, this message translates to:
+  /// **'Freundschaftsanfrage gesendet!'**
+  String get friendRequestSentSuccess;
+
+  /// No description provided for @friendRequestAlreadySent.
+  ///
+  /// In de, this message translates to:
+  /// **'Freundschaftsanfrage bereits gesendet.'**
+  String get friendRequestAlreadySent;
+
+  /// No description provided for @alreadyFriends.
+  ///
+  /// In de, this message translates to:
+  /// **'Ihr seid bereits befreundet!'**
+  String get alreadyFriends;
+
+  /// No description provided for @cancelRequest.
+  ///
+  /// In de, this message translates to:
+  /// **'Anfrage zurückziehen'**
+  String get cancelRequest;
+
+  /// No description provided for @requestPending.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausstehend'**
+  String get requestPending;
+
+  /// No description provided for @errorLoadingFriends.
+  ///
+  /// In de, this message translates to:
+  /// **'Fehler beim Laden der Freunde: {error}'**
+  String errorLoadingFriends(Object error);
+
+  /// No description provided for @incomingRequestsCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 offene Anfrage} other{{count} offene Anfragen}}'**
+  String incomingRequestsCount(num count);
+
+  /// No description provided for @refresh.
+  ///
+  /// In de, this message translates to:
+  /// **'Aktualisieren'**
+  String get refresh;
 }
 
 class _AppLocalizationsDelegate

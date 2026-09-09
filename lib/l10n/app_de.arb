@@ -281,5 +281,20 @@
   "googleSignInSuccessMessage": "Erfolgreich mit Google angemeldet!",
   "continueWithGoogle": "Mit Google fortfahren",
   "orDivider": "ODER",
-  "continueWithoutSignIn": "Ohne Anmeldung fortfahren"
+  "continueWithoutSignIn": "Ohne Anmeldung fortfahren",
+  "friendRequestsTitle": "Freundschaftsanfragen",
+  "incomingRequests": "Eingehende Anfragen",
+  "outgoingRequests": "Gesendete Anfragen",
+  "accept": "Annehmen",
+  "decline": "Ablehnen",
+  "friendRequestAccepted": "Freundschaftsanfrage angenommen!",
+  "friendRequestDeclined": "Freundschaftsanfrage abgelehnt.",
+  "friendRequestSentSuccess": "Freundschaftsanfrage gesendet!",
+  "friendRequestAlreadySent": "Freundschaftsanfrage bereits gesendet.",
+  "alreadyFriends": "Ihr seid bereits befreundet!",
+  "cancelRequest": "Anfrage zurückziehen",
+  "requestPending": "Ausstehend",
+  "errorLoadingFriends": "Fehler beim Laden der Freunde: {error}",
+  "incomingRequestsCount": "{count, plural, =1{1 offene Anfrage} other{{count} offene Anfragen}}",
+  "refresh": "Aktualisieren"
 }

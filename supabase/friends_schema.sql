@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS public.friendships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     friend_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    status TEXT NOT NULL DEFAULT 'accepted',
+    status TEXT NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT unique_friendship UNIQUE (user_id, friend_id),
     CONSTRAINT not_self_friend CHECK (user_id <> friend_id)
@@ -113,6 +113,8 @@ CREATE TABLE IF NOT EXISTS public.friendships (
 
 CREATE INDEX IF NOT EXISTS idx_friendships_user_id ON public.friendships(user_id);
 CREATE INDEX IF NOT EXISTS idx_friendships_friend_id ON public.friendships(friend_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_friend_status ON public.friendships(friend_id, status);
+CREATE INDEX IF NOT EXISTS idx_friendships_user_status ON public.friendships(user_id, status);
 
 -- 5. linked_user_id Spalte in match_player_scores hinzufügen
 ALTER TABLE public.match_player_scores 
@@ -159,6 +161,13 @@ CREATE POLICY "Users can add friends"
     ON public.friendships FOR INSERT
     TO authenticated
     WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can update friendships" ON public.friendships;
+CREATE POLICY "Users can update friendships"
+    ON public.friendships FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = friend_id OR auth.uid() = user_id)
+    WITH CHECK (auth.uid() = friend_id OR auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can delete friendships" ON public.friendships;
 CREATE POLICY "Users can delete friendships"

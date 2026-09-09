@@ -108,6 +108,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         ref.invalidate(myPlayerProvider);
         ref.invalidate(myProfileProvider);
         ref.invalidate(friendsListProvider);
+        ref.invalidate(incomingFriendRequestsProvider);
+        ref.invalidate(outgoingFriendRequestsProvider);
 
         // When a user logs in, automatically sync their data from the cloud
         if (next != null) {
@@ -131,6 +133,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     AppLocalizations l10n,
   ) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final incomingRequestsCount = ref.watch(incomingFriendRequestsProvider).value?.length ?? 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -143,8 +146,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         ),
       ),
       padding: EdgeInsets.only(
-        top: 8,
-        bottom: bottomPadding > 0 ? bottomPadding : 10,
+        top: 6,
+        bottom: bottomPadding > 0 ? bottomPadding : 6,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -177,6 +180,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             activeIcon: Icons.person_rounded,
             label: l10n.navAccount,
             theme: theme,
+            badgeCount: incomingRequestsCount,
           ),
         ],
       ),
@@ -189,10 +193,23 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     required IconData activeIcon,
     required String label,
     required ThemeData theme,
+    int badgeCount = 0,
   }) {
     final isSelected = _currentIndex == index;
     final activeColor = theme.colorScheme.primary;
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
+
+    Widget iconWidget = Icon(
+      isSelected ? activeIcon : icon,
+      size: 22,
+      color: isSelected ? activeColor : inactiveColor,
+    );
+    if (badgeCount > 0) {
+      iconWidget = Badge.count(
+        count: badgeCount,
+        child: iconWidget,
+      );
+    }
 
     return Expanded(
       child: Tooltip(
@@ -225,11 +242,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
-                    isSelected ? activeIcon : icon,
-                    size: 22,
-                    color: isSelected ? activeColor : inactiveColor,
-                  ),
+                  child: iconWidget,
                 ),
                 const SizedBox(height: 3),
                 Text(

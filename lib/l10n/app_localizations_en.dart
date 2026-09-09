@@ -944,4 +944,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueWithoutSignIn => 'Continue without signing in';
+
+  @override
+  String get friendRequestsTitle => 'Friend Requests';
+
+  @override
+  String get incomingRequests => 'Incoming Requests';
+
+  @override
+  String get outgoingRequests => 'Sent Requests';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get friendRequestAccepted => 'Friend request accepted!';
+
+  @override
+  String get friendRequestDeclined => 'Friend request declined.';
+
+  @override
+  String get friendRequestSentSuccess => 'Friend request sent!';
+
+  @override
+  String get friendRequestAlreadySent => 'Friend request already sent.';
+
+  @override
+  String get alreadyFriends => 'You are already friends!';
+
+  @override
+  String get cancelRequest => 'Cancel request';
+
+  @override
+  String get requestPending => 'Pending';
+
+  @override
+  String errorLoadingFriends(Object error) {
+    return 'Error loading friends: $error';
+  }
+
+  @override
+  String incomingRequestsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending requests',
+      one: '1 pending request',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get refresh => 'Refresh';
 }
