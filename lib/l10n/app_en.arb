@@ -5,6 +5,7 @@
   "navRecord": "Record",
   "navPlayers": "Players",
   "navLibrary": "Library",
+  "navCompare": "Duels",
 
   "globalStatistics": "Global Statistics",
   "matchesPlayed": "Matches Played",
@@ -140,6 +141,10 @@
   "languageSystem": "System Default",
   "languageGerman": "Deutsch",
   "languageEnglish": "English",
+  "themeSectionTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
 
   "sortNameAsc": "Name (A–Z)",
   "sortNameDesc": "Name (Z–A)",

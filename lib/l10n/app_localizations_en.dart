@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLibrary => 'Library';
 
   @override
+  String get navCompare => 'Duels';
+
+  @override
   String get globalStatistics => 'Global Statistics';
 
   @override
@@ -468,6 +471,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageEnglish => 'English';
+
+  @override
+  String get themeSectionTitle => 'Appearance';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
 
   @override
   String get sortNameAsc => 'Name (A–Z)';

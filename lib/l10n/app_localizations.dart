@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Bibliothek'**
   String get navLibrary;
 
+  /// No description provided for @navCompare.
+  ///
+  /// In de, this message translates to:
+  /// **'Duelle'**
+  String get navCompare;
+
   /// No description provided for @globalStatistics.
   ///
   /// In de, this message translates to:
@@ -877,6 +883,30 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'English'**
   String get languageEnglish;
+
+  /// No description provided for @themeSectionTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Erscheinungsbild'**
+  String get themeSectionTitle;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In de, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Hell'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In de, this message translates to:
+  /// **'Dunkel'**
+  String get themeDark;
 
   /// No description provided for @sortNameAsc.
   ///

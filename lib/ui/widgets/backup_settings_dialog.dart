@@ -204,6 +204,69 @@ class _BackupSettingsDialogState extends ConsumerState<BackupSettingsDialog> {
     );
   }
 
+  Widget _buildThemeSelector(BuildContext context) {
+    final l10n = context.l10n;
+    final currentThemeMode = ref.watch(themeModeProvider);
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.palette_outlined, size: 20, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              l10n.themeSectionTitle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<ThemeMode>(
+            segments: [
+              ButtonSegment<ThemeMode>(
+                value: ThemeMode.system,
+                icon: const Icon(Icons.brightness_auto_outlined, size: 16),
+                label: Text(
+                  l10n.themeSystem,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              ButtonSegment<ThemeMode>(
+                value: ThemeMode.light,
+                icon: const Icon(Icons.light_mode_outlined, size: 16),
+                label: Text(
+                  l10n.themeLight,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              ButtonSegment<ThemeMode>(
+                value: ThemeMode.dark,
+                icon: const Icon(Icons.dark_mode_outlined, size: 16),
+                label: Text(
+                  l10n.themeDark,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+            selected: {currentThemeMode},
+            onSelectionChanged: (Set<ThemeMode> newSelection) {
+              ref.read(themeModeProvider.notifier).setThemeMode(newSelection.first);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLanguageSelector(BuildContext context) {
     final l10n = context.l10n;
     final currentLocale = ref.watch(localeProvider);
@@ -287,6 +350,8 @@ class _BackupSettingsDialogState extends ConsumerState<BackupSettingsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildThemeSelector(context),
+            const SizedBox(height: 16),
             _buildLanguageSelector(context),
             const SizedBox(height: 16),
             const Divider(),

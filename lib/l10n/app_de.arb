@@ -5,6 +5,7 @@
   "navRecord": "Eintragen",
   "navPlayers": "Spieler",
   "navLibrary": "Bibliothek",
+  "navCompare": "Duelle",
 
   "globalStatistics": "Globale Statistiken",
   "matchesPlayed": "Partien gespielt",
@@ -140,6 +141,10 @@
   "languageSystem": "Systemstandard",
   "languageGerman": "Deutsch",
   "languageEnglish": "English",
+  "themeSectionTitle": "Erscheinungsbild",
+  "themeSystem": "System",
+  "themeLight": "Hell",
+  "themeDark": "Dunkel",
 
   "sortNameAsc": "Name (A–Z)",
   "sortNameDesc": "Name (Z–A)",
