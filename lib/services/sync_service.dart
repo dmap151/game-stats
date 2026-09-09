@@ -51,7 +51,8 @@ class SyncService {
       throw Exception('Benutzer nicht angemeldet.');
     }
 
-    // 0. Clean local duplicates if any exist
+    // 0. Recover images and clean local duplicates if any exist
+    await _db.recoverLostMatchImagesAndData();
     await _db.deduplicateMatchRecords();
 
     // 1. Clean remote duplicates if previous sync created any
@@ -68,7 +69,10 @@ class SyncService {
     // 4. Sync Matches
     syncedTotal += await _syncMatches(user.id);
 
-    // 5. Final local deduplication safety check
+    // 5. Recover any missing images from legacy or local cache
+    await _db.recoverLostMatchImagesAndData();
+
+    // 6. Final local deduplication safety check
     await _db.deduplicateMatchRecords();
 
     return syncedTotal;
@@ -298,10 +302,12 @@ class SyncService {
         }
       }
 
-      // Check if already present on this device by date & game name (within 10 minutes)
+      // Check if already present on this device by date & game name (within 180 minutes to cover timezone differences)
       final matchWithTimeAndGame = currentLocalMatches.any((m) {
         final diffMinutes = (m.date.toUtc().difference(remoteDateUtc)).abs().inMinutes;
-        return diffMinutes <= 10 && m.game.value?.name == gameName;
+        final sameGame = m.game.value?.name != null &&
+            m.game.value!.name.toLowerCase() == gameName.toLowerCase();
+        return diffMinutes <= 180 && sameGame;
       });
 
       if (matchWithTimeAndGame) {

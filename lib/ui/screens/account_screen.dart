@@ -627,6 +627,7 @@ class AccountScreen extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () async {
                     final db = ref.read(databaseProvider);
+                    await db.recoverLostMatchImagesAndData();
                     final deleted = await db.deduplicateMatchRecords();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(

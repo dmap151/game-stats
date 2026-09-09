@@ -38,7 +38,6 @@ class DatabaseService {
         : '${baseDir.path}/guest';
 
     final targetDir = Directory(targetPath);
-    final bool isFirstTimeUser = !targetDir.existsSync();
     if (!targetDir.existsSync()) {
       await targetDir.create(recursive: true);
     }
@@ -49,73 +48,279 @@ class DatabaseService {
       name: instanceName,
     );
 
-    // If this is the first time a user is opened on this device,
-    // and legacy default.isar exists in baseDir, migrate data into this user's DB
-    if (userId != null && isFirstTimeUser) {
-      await _migrateLegacyDataIfPresent(baseDir.path);
-    }
+    // Always run legacy migration and photo recovery if legacy data exists
+    await recoverLostMatchImagesAndData();
   }
 
-  /// Migrates legacy records from the default root Isar instance if it exists.
-  Future<void> _migrateLegacyDataIfPresent(String basePath) async {
-    final legacyFile = File('$basePath/default.isar');
-    if (!legacyFile.existsSync()) return;
+  /// Recovers lost match images, game thumbnails, and player avatars from legacy
+  /// databases (e.g. default.isar, guest/guest.isar) or from local device storage.
+  /// Also migrates any legacy records that were not previously imported.
+  Future<int> recoverLostMatchImagesAndData() async {
+    final baseDir = baseDirProvider != null
+        ? await baseDirProvider!()
+        : await getApplicationDocumentsDirectory();
 
-    try {
-      final legacyInstance = Isar.getInstance('default') ??
-          await Isar.open(
-            [GameSchema, MatchRecordSchema, PlayerSchema],
-            directory: basePath,
-            name: 'default',
-          );
+    int recoveredCount = 0;
 
-      final legacyGames = await legacyInstance.games.where().findAll();
-      final legacyPlayers = await legacyInstance.players.where().findAll();
-      final legacyMatches = await legacyInstance.matchRecords.where().findAll();
-
-      if (legacyGames.isNotEmpty || legacyPlayers.isNotEmpty || legacyMatches.isNotEmpty) {
-        await isar.writeTxn(() async {
-          for (final g in legacyGames) {
-            await isar.games.put(Game()
-              ..name = g.name
-              ..imagePath = g.imagePath);
-          }
-          for (final p in legacyPlayers) {
-            await isar.players.put(Player()
-              ..name = p.name
-              ..imagePath = p.imagePath
-              ..isMe = p.isMe
-              ..linkedUserId = p.linkedUserId
-              ..friendCode = p.friendCode);
-          }
-          for (final m in legacyMatches) {
-            final gameName = m.game.value?.name;
-            Game? matchingGame;
-            if (gameName != null) {
-              matchingGame = await isar.games.where().nameEqualTo(gameName).findFirst();
-            }
-            final newMatch = MatchRecord()
-              ..date = m.date
-              ..numberOfPlayers = m.numberOfPlayers
-              ..imagePath = m.imagePath
-              ..imagePaths = List.from(m.imagePaths)
-              ..latitude = m.latitude
-              ..longitude = m.longitude
-              ..playerScores = m.playerScores.map((ps) => PlayerScore()
-                ..playerId = ps.playerId
-                ..playerName = ps.playerName
-                ..placement = ps.placement
-                ..score = ps.score
-                ..linkedUserId = ps.linkedUserId).toList();
-            newMatch.game.value = matchingGame;
-            await isar.matchRecords.put(newMatch);
-            await newMatch.game.save();
-          }
-        });
-      }
-    } catch (_) {
-      // Non-critical migration fallback
+    // List of candidate legacy database directories to inspect
+    final candidateDirs = <String>[
+      baseDir.path, // default.isar (root instance)
+    ];
+    if (_currentUserId != null) {
+      candidateDirs.add('${baseDir.path}/guest'); // guest.isar
     }
+
+    for (final dirPath in candidateDirs) {
+      final isRoot = dirPath == baseDir.path;
+      final instanceName = isRoot ? 'default' : 'guest';
+      final isarFile = File('$dirPath/$instanceName.isar');
+      if (!isarFile.existsSync()) continue;
+
+      // Don't inspect self if current instance is guest and dir is guest
+      if (_currentUserId == null && !isRoot) continue;
+
+      try {
+        final legacyInstance = Isar.getInstance(instanceName) ??
+            await Isar.open(
+              [GameSchema, MatchRecordSchema, PlayerSchema],
+              directory: dirPath,
+              name: instanceName,
+            );
+
+        final legacyGames = await legacyInstance.games.where().findAll();
+        final legacyPlayers = await legacyInstance.players.where().findAll();
+        final legacyMatches = await legacyInstance.matchRecords.where().findAll();
+
+        // 1. Ensure game links are loaded on legacy matches
+        for (final m in legacyMatches) {
+          await m.game.load();
+        }
+
+        // 2. Sync Games
+        final currentGames = await isar.games.where().findAll();
+        final gameByName = <String, Game>{
+          for (final g in currentGames) g.name.toLowerCase(): g,
+        };
+
+        for (final lg in legacyGames) {
+          final key = lg.name.toLowerCase();
+          final existing = gameByName[key];
+          if (existing == null) {
+            final newGame = Game()
+              ..name = lg.name
+              ..imagePath = lg.imagePath;
+            final id = await isar.writeTxn(() => isar.games.put(newGame));
+            newGame.id = id;
+            gameByName[key] = newGame;
+          } else if ((existing.imagePath == null || existing.imagePath!.isEmpty) &&
+              lg.imagePath != null &&
+              lg.imagePath!.isNotEmpty) {
+            existing.imagePath = lg.imagePath;
+            await isar.writeTxn(() => isar.games.put(existing));
+          }
+        }
+
+        // 3. Sync Players
+        final currentPlayers = await isar.players.where().findAll();
+        final playerByName = <String, Player>{
+          for (final p in currentPlayers) p.name.toLowerCase(): p,
+        };
+
+        for (final lp in legacyPlayers) {
+          final key = lp.name.toLowerCase();
+          final existing = playerByName[key];
+          if (existing == null) {
+            final newPlayer = Player()
+              ..name = lp.name
+              ..imagePath = lp.imagePath
+              ..isMe = lp.isMe
+              ..linkedUserId = lp.linkedUserId
+              ..friendCode = lp.friendCode;
+            final id = await isar.writeTxn(() => isar.players.put(newPlayer));
+            newPlayer.id = id;
+            playerByName[key] = newPlayer;
+          } else if ((existing.imagePath == null || existing.imagePath!.isEmpty) &&
+              lp.imagePath != null &&
+              lp.imagePath!.isNotEmpty) {
+            existing.imagePath = lp.imagePath;
+            await isar.writeTxn(() => isar.players.put(existing));
+          }
+        }
+
+        // 4. Recover & Merge Matches
+        final currentMatches = await getAllMatchRecords();
+
+        for (final lm in legacyMatches) {
+          final lmGameName = lm.game.value?.name;
+
+          // Find candidate in current matches
+          MatchRecord? matchingCurrent;
+          for (final cm in currentMatches) {
+            final diffMinutes = (cm.date.difference(lm.date)).abs().inMinutes;
+            if (diffMinutes > 180) continue;
+
+            final sameGame = lmGameName != null &&
+                cm.game.value?.name != null &&
+                cm.game.value!.name.toLowerCase() == lmGameName.toLowerCase();
+
+            final s1 = cm.playerScores.map((s) => '${s.playerName}:${s.score}:${s.placement}').toList()..sort();
+            final s2 = lm.playerScores.map((s) => '${s.playerName}:${s.score}:${s.placement}').toList()..sort();
+            final scoresMatch = s1.isNotEmpty && s1.join(',') == s2.join(',');
+
+            if (sameGame || scoresMatch) {
+              matchingCurrent = cm;
+              break;
+            }
+          }
+
+          if (matchingCurrent != null) {
+            bool updated = false;
+
+            // Merge images
+            final allImages = <String>{};
+            if (matchingCurrent.imagePath != null && matchingCurrent.imagePath!.isNotEmpty) {
+              allImages.add(matchingCurrent.imagePath!);
+            }
+            for (final img in matchingCurrent.imagePaths) {
+              if (img.isNotEmpty) allImages.add(img);
+            }
+            if (lm.imagePath != null && lm.imagePath!.isNotEmpty) {
+              allImages.add(lm.imagePath!);
+            }
+            for (final img in lm.imagePaths) {
+              if (img.isNotEmpty) allImages.add(img);
+            }
+
+            if (allImages.isNotEmpty) {
+              final imgList = allImages.toList();
+              if (matchingCurrent.imagePath != imgList.first) {
+                matchingCurrent.imagePath = imgList.first;
+                updated = true;
+              }
+              final newSub = imgList.length > 1 ? imgList.sublist(1) : <String>[];
+              if (matchingCurrent.imagePaths.length != newSub.length) {
+                matchingCurrent.imagePaths = newSub;
+                updated = true;
+              }
+            }
+
+            // Restore game link if missing
+            if (matchingCurrent.game.value == null && lmGameName != null) {
+              final g = gameByName[lmGameName.toLowerCase()];
+              if (g != null) {
+                matchingCurrent.game.value = g;
+                updated = true;
+              }
+            }
+
+            // Restore location if missing
+            if (matchingCurrent.latitude == null && lm.latitude != null) {
+              matchingCurrent.latitude = lm.latitude;
+              matchingCurrent.longitude = lm.longitude;
+              updated = true;
+            }
+
+            if (updated) {
+              await isar.writeTxn(() async {
+                await isar.matchRecords.put(matchingCurrent!);
+                if (matchingCurrent.game.value != null) {
+                  await matchingCurrent.game.save();
+                }
+              });
+              recoveredCount++;
+            }
+          } else {
+            // Completely missing match from legacy: insert into current DB
+            Game? matchingGame;
+            if (lmGameName != null) {
+              matchingGame = gameByName[lmGameName.toLowerCase()];
+            }
+
+            final newMatch = MatchRecord()
+              ..date = lm.date
+              ..numberOfPlayers = lm.numberOfPlayers
+              ..imagePath = lm.imagePath
+              ..imagePaths = List.from(lm.imagePaths)
+              ..latitude = lm.latitude
+              ..longitude = lm.longitude
+              ..playerScores = lm.playerScores
+                  .map((ps) => PlayerScore()
+                    ..playerId = ps.playerId
+                    ..playerName = ps.playerName
+                    ..placement = ps.placement
+                    ..score = ps.score
+                    ..linkedUserId = ps.linkedUserId)
+                  .toList();
+
+            newMatch.game.value = matchingGame;
+            await isar.writeTxn(() async {
+              await isar.matchRecords.put(newMatch);
+              if (newMatch.game.value != null) {
+                await newMatch.game.save();
+              }
+            });
+            currentMatches.add(newMatch);
+            recoveredCount++;
+          }
+        }
+      } catch (e) {
+        // Non-fatal legacy recovery
+      }
+    }
+
+    // 5. Disk Photo Fallback: scan documents directory for image files
+    try {
+      final docFiles = Directory(baseDir.path)
+          .listSync()
+          .whereType<File>()
+          .where((f) {
+            final ext = f.path.toLowerCase();
+            return ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png');
+          })
+          .toList();
+
+      if (docFiles.isNotEmpty) {
+        final matches = await getAllMatchRecords();
+        for (final m in matches) {
+          if ((m.imagePath != null && m.imagePath!.isNotEmpty) || m.imagePaths.isNotEmpty) {
+            continue;
+          }
+
+          final mMillis = m.date.millisecondsSinceEpoch;
+          File? bestFile;
+          int smallestDiff = 24 * 60 * 60 * 1000; // max 24 hours
+
+          for (final file in docFiles) {
+            final name = file.uri.pathSegments.last;
+            final digits = name.replaceAll(RegExp(r'[^0-9]'), '');
+            int? fileTime;
+            if (digits.length >= 10) {
+              fileTime = int.tryParse(digits);
+            }
+            fileTime ??= file.lastModifiedSync().millisecondsSinceEpoch;
+
+            final diff = (fileTime - mMillis).abs();
+            if (diff < smallestDiff) {
+              smallestDiff = diff;
+              bestFile = file;
+            }
+          }
+
+          if (bestFile != null && smallestDiff <= 12 * 60 * 60 * 1000) {
+            m.imagePath = bestFile.path;
+            await isar.writeTxn(() async {
+              await isar.matchRecords.put(m);
+              if (m.game.value != null) {
+                await m.game.save();
+              }
+            });
+            recoveredCount++;
+          }
+        }
+      }
+    } catch (_) {}
+
+    return recoveredCount;
   }
 
   /// Switches the database to the specified user (or guest if null).
@@ -309,15 +514,19 @@ class DatabaseService {
   /// Finds and removes duplicate match records created by sync or multiple imports.
   /// Matches are considered duplicates if they have the same game name,
   /// identical player scores, and occurred within 3 hours (timezone shifts).
+  /// Any photos or metadata on the duplicate are safely preserved in the kept record.
   Future<int> deduplicateMatchRecords() async {
     final matches = await getAllMatchRecords();
     final toDelete = <int>[];
     final kept = <MatchRecord>[];
+    final updatedKept = <MatchRecord>[];
 
     for (final match in matches) {
       bool isDuplicate = false;
       for (final k in kept) {
-        final sameGame = k.game.value?.name == match.game.value?.name;
+        final sameGame = k.game.value?.name != null &&
+            match.game.value?.name != null &&
+            k.game.value!.name.toLowerCase() == match.game.value!.name.toLowerCase();
         final dateDiffMinutes = (k.date.difference(match.date)).abs().inMinutes;
         final sameTime = dateDiffMinutes <= 180;
 
@@ -326,6 +535,46 @@ class DatabaseService {
           final s2 = match.playerScores.map((s) => '${s.playerName}:${s.score}:${s.placement}').toList()..sort();
           if (s1.join(',') == s2.join(',')) {
             isDuplicate = true;
+
+            // Merge photos and metadata into k before discarding match
+            bool kModified = false;
+            final allImages = <String>{};
+            if (k.imagePath != null && k.imagePath!.isNotEmpty) allImages.add(k.imagePath!);
+            for (final p in k.imagePaths) {
+              if (p.isNotEmpty) allImages.add(p);
+            }
+            if (match.imagePath != null && match.imagePath!.isNotEmpty) allImages.add(match.imagePath!);
+            for (final p in match.imagePaths) {
+              if (p.isNotEmpty) allImages.add(p);
+            }
+
+            if (allImages.isNotEmpty) {
+              final imgList = allImages.toList();
+              if (k.imagePath != imgList.first) {
+                k.imagePath = imgList.first;
+                kModified = true;
+              }
+              final sub = imgList.length > 1 ? imgList.sublist(1) : <String>[];
+              if (k.imagePaths.length != sub.length) {
+                k.imagePaths = sub;
+                kModified = true;
+              }
+            }
+
+            if (k.game.value == null && match.game.value != null) {
+              k.game.value = match.game.value;
+              kModified = true;
+            }
+
+            if (k.latitude == null && match.latitude != null) {
+              k.latitude = match.latitude;
+              k.longitude = match.longitude;
+              kModified = true;
+            }
+
+            if (kModified) {
+              updatedKept.add(k);
+            }
             break;
           }
         }
@@ -336,6 +585,17 @@ class DatabaseService {
       } else {
         kept.add(match);
       }
+    }
+
+    if (updatedKept.isNotEmpty) {
+      await isar.writeTxn(() async {
+        for (final k in updatedKept) {
+          await isar.matchRecords.put(k);
+          if (k.game.value != null) {
+            await k.game.save();
+          }
+        }
+      });
     }
 
     if (toDelete.isNotEmpty) {

@@ -32,5 +32,18 @@ void main() {
       expect(userADir.path, isNot(equals(guestDir.path)));
       expect(userBDir.path, isNot(equals(guestDir.path)));
     });
+
+    test('Legacy database paths exist in base directory for migration lookup', () {
+      final defaultIsar = File('${tempDir.path}/default.isar');
+      final guestIsar = File('${tempDir.path}/guest/guest.isar');
+
+      defaultIsar.createSync(recursive: true);
+      guestIsar.createSync(recursive: true);
+
+      expect(defaultIsar.existsSync(), isTrue);
+      expect(guestIsar.existsSync(), isTrue);
+      expect(defaultIsar.path, contains('default.isar'));
+      expect(guestIsar.path, contains('guest.isar'));
+    });
   });
 }
