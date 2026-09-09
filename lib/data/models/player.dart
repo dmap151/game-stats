@@ -11,4 +11,9 @@ class Player {
   
   String? imagePath;
 
+  bool isMe = false;
+
+  String? linkedUserId;
+
+  String? friendCode;
 }

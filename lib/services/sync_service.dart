@@ -202,6 +202,7 @@ class SyncService {
   Future<int> _syncMatches(String userId) async {
     int count = 0;
     final localMatches = await _db.getAllMatchRecords();
+    final localPlayers = await _db.getAllPlayers();
 
     // 1. Upload local matches
     for (final match in localMatches) {
@@ -244,12 +245,28 @@ class SyncService {
           final matchId = insertedMatch['id'] as String;
 
           for (final score in match.playerScores) {
+            String? linkedId = score.linkedUserId;
+            if (linkedId == null) {
+              final player = localPlayers.cast<Player?>().firstWhere(
+                (p) => p != null && (p.id == score.playerId || p.name == score.playerName),
+                orElse: () => null,
+              );
+              if (player != null) {
+                if (player.isMe) {
+                  linkedId = userId;
+                } else if (player.linkedUserId != null) {
+                  linkedId = player.linkedUserId;
+                }
+              }
+            }
+
             await _client.from('match_player_scores').insert({
               'match_id': matchId,
               'player_name': score.playerName ?? 'Spieler',
               'score': (score.score ?? 0).toDouble(),
               'is_winner': score.placement == 1,
               'rank': score.placement,
+              'linked_user_id': linkedId,
             });
           }
           count++;
@@ -257,23 +274,24 @@ class SyncService {
       }
     }
 
-    // 2. Download remote matches
+    // 2. Download remote matches (both created by this user and shared with this user)
     // Reload local matches after upload
     final currentLocalMatches = await _db.getAllMatchRecords();
+    var currentLocalPlayers = await _db.getAllPlayers();
 
     final List<dynamic> remoteMatches = await _client
         .from('matches')
-        .select('*, match_player_scores(*)')
-        .eq('user_id', userId);
+        .select('*, match_player_scores(*)');
 
     for (final item in remoteMatches) {
       final remote = item as Map<String, dynamic>;
       final remoteLocalId = remote['local_id'] as num?;
+      final remoteUserId = remote['user_id'] as String?;
       final remoteDateUtc = DateTime.parse(remote['date'] as String).toUtc();
       final gameName = remote['game_name'] as String;
 
-      // Check if already present on this device by local_id
-      if (remoteLocalId != null) {
+      // Only check local_id if this match was created on this user's account
+      if (remoteLocalId != null && remoteUserId == userId) {
         final matchWithId = currentLocalMatches.any((m) => m.id == remoteLocalId.toInt());
         if (matchWithId) {
           continue;
@@ -297,13 +315,54 @@ class SyncService {
       }
 
       final rawScores = (remote['match_player_scores'] as List<dynamic>?) ?? [];
-      final scores = rawScores.map((s) {
+      final scores = <PlayerScore>[];
+
+      for (final s in rawScores) {
         final sm = s as Map<String, dynamic>;
-        return PlayerScore()
-          ..playerName = sm['player_name'] as String?
-          ..placement = (sm['rank'] as num?)?.toInt() ?? 1
-          ..score = (sm['score'] as num?)?.toInt();
-      }).toList();
+        final scoreLinkedUserId = sm['linked_user_id'] as String?;
+        final scorePlayerName = (sm['player_name'] as String?) ?? 'Spieler';
+
+        // Resolve or create local player
+        Player? matchingPlayer;
+        if (scoreLinkedUserId != null) {
+          if (scoreLinkedUserId == userId) {
+            matchingPlayer = currentLocalPlayers.cast<Player?>().firstWhere(
+              (p) => p?.isMe == true,
+              orElse: () => null,
+            );
+          } else {
+            matchingPlayer = currentLocalPlayers.cast<Player?>().firstWhere(
+              (p) => p?.linkedUserId == scoreLinkedUserId,
+              orElse: () => null,
+            );
+          }
+        }
+        matchingPlayer ??= currentLocalPlayers.cast<Player?>().firstWhere(
+          (p) => p?.name == scorePlayerName,
+          orElse: () => null,
+        );
+
+        if (matchingPlayer == null) {
+          final isMe = scoreLinkedUserId == userId;
+          final newPlayer = Player()
+            ..name = scorePlayerName
+            ..isMe = isMe
+            ..linkedUserId = scoreLinkedUserId;
+          final newId = await _db.savePlayer(newPlayer);
+          newPlayer.id = newId;
+          currentLocalPlayers = await _db.getAllPlayers();
+          matchingPlayer = newPlayer;
+        }
+
+        scores.add(
+          PlayerScore()
+            ..playerId = matchingPlayer.id
+            ..playerName = matchingPlayer.name
+            ..placement = (sm['rank'] as num?)?.toInt() ?? 1
+            ..score = (sm['score'] as num?)?.toInt()
+            ..linkedUserId = scoreLinkedUserId,
+        );
+      }
 
       final newMatch = MatchRecord()
         ..date = remoteDateUtc.toLocal()

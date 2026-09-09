@@ -45,6 +45,133 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
     }
   }
 
+  Future<void> _setAsMyProfile() async {
+    final db = ref.read(databaseProvider);
+    await db.setMyPlayer(_currentPlayer.id);
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      _currentPlayer.linkedUserId = user.id;
+      await db.savePlayer(_currentPlayer);
+    }
+    setState(() {
+      _currentPlayer.isMe = true;
+    });
+    ref.invalidate(playersProvider);
+    ref.invalidate(myPlayerProvider);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_currentPlayer.name} ist jetzt als "ICH" festgelegt.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _unlinkFriend() async {
+    final db = ref.read(databaseProvider);
+    await db.unlinkPlayer(_currentPlayer.id);
+    setState(() {
+      _currentPlayer.linkedUserId = null;
+      _currentPlayer.friendCode = null;
+    });
+    ref.invalidate(playersProvider);
+    ref.invalidate(friendsListProvider);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Freund-Verknüpfung aufgehoben.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showLinkWithFriendSheet() async {
+    final friendsAsync = ref.read(friendsListProvider);
+    final friends = friendsAsync.value ?? [];
+
+    if (friends.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Noch keine Freunde in der Freundesliste. Füge im Account-Bereich Freunde hinzu.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    final theme = Theme.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Mit Freund verknüpfen',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Wähle einen Freund aus, um ${_currentPlayer.name} mit dessen Online-Konto zu verknüpfen.',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+              const Divider(height: 24),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    final friend = friends[index];
+                    final isCurrent = _currentPlayer.linkedUserId == friend.id;
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: theme.colorScheme.secondaryContainer,
+                        child: Text(
+                          friend.displayName.isNotEmpty ? friend.displayName[0].toUpperCase() : 'F',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
+                        ),
+                      ),
+                      title: Text(friend.displayName),
+                      subtitle: Text(friend.friendCode),
+                      trailing: isCurrent ? Icon(Icons.check_circle, color: theme.colorScheme.primary) : null,
+                      onTap: () async {
+                        final db = ref.read(databaseProvider);
+                        await db.linkPlayerToFriend(_currentPlayer.id, friend.id, friend.friendCode);
+                        setState(() {
+                          _currentPlayer.linkedUserId = friend.id;
+                          _currentPlayer.friendCode = friend.friendCode;
+                        });
+                        ref.invalidate(playersProvider);
+                        ref.invalidate(friendsListProvider);
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _editProfile() async {
     final l10n = context.l10n;
     await showModalBottomSheet<void>(
@@ -193,6 +320,48 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                     Text(
                       _currentPlayer.name,
                       style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        if (_currentPlayer.isMe)
+                          Chip(
+                            avatar: Icon(Icons.person_pin, size: 18, color: theme.colorScheme.onPrimaryContainer),
+                            label: const Text('ICH'),
+                            backgroundColor: theme.colorScheme.primaryContainer,
+                            labelStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          )
+                        else
+                          ActionChip(
+                            avatar: const Icon(Icons.person_pin_outlined, size: 18),
+                            label: const Text('Als "ICH" festlegen'),
+                            onPressed: _setAsMyProfile,
+                          ),
+                        if (_currentPlayer.linkedUserId != null)
+                          Chip(
+                            avatar: Icon(Icons.link_rounded, size: 18, color: theme.colorScheme.onSecondaryContainer),
+                            label: Text(_currentPlayer.friendCode ?? 'Freund verknüpft'),
+                            backgroundColor: theme.colorScheme.secondaryContainer,
+                            labelStyle: TextStyle(
+                              color: theme.colorScheme.onSecondaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            deleteIcon: const Icon(Icons.close, size: 16),
+                            onDeleted: _unlinkFriend,
+                          )
+                        else if (!_currentPlayer.isMe)
+                          ActionChip(
+                            avatar: const Icon(Icons.link_rounded, size: 18),
+                            label: const Text('Mit Freund verknüpfen'),
+                            onPressed: _showLinkWithFriendSheet,
+                          ),
+                      ],
                     ),
                   ],
                 ),

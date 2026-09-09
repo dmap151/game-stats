@@ -128,7 +128,8 @@ class StatCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                ?trailing,
+                // ignore: use_null_aware_elements
+                if (trailing != null) trailing!,
               ],
             ),
           ),

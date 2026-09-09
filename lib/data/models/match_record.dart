@@ -9,6 +9,7 @@ class PlayerScore {
   String? playerName;
   int placement = 1;
   int? score;
+  String? linkedUserId;
 }
 
 @collection

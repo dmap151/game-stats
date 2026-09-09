@@ -84,6 +84,49 @@ class DatabaseService {
     });
   }
 
+  /// Returns the player designated as "Me" (current device user), if set.
+  Future<Player?> getMyPlayer() async {
+    return await isar.players.filter().isMeEqualTo(true).findFirst();
+  }
+
+  /// Sets exactly one player as "Me" and unsets isMe on all other players.
+  Future<void> setMyPlayer(int playerId) async {
+    await isar.writeTxn(() async {
+      final allPlayers = await isar.players.where().findAll();
+      for (final p in allPlayers) {
+        final shouldBeMe = p.id == playerId;
+        if (p.isMe != shouldBeMe) {
+          p.isMe = shouldBeMe;
+          await isar.players.put(p);
+        }
+      }
+    });
+  }
+
+  /// Links a local player to a Supabase friend account by user ID and friend code.
+  Future<void> linkPlayerToFriend(int playerId, String friendUserId, String friendCode) async {
+    final player = await isar.players.get(playerId);
+    if (player != null) {
+      player.linkedUserId = friendUserId;
+      player.friendCode = friendCode;
+      await isar.writeTxn(() async {
+        await isar.players.put(player);
+      });
+    }
+  }
+
+  /// Unlinks a player from any friend account.
+  Future<void> unlinkPlayer(int playerId) async {
+    final player = await isar.players.get(playerId);
+    if (player != null) {
+      player.linkedUserId = null;
+      player.friendCode = null;
+      await isar.writeTxn(() async {
+        await isar.players.put(player);
+      });
+    }
+  }
+
   // --- Game Methods ---
 
   Future<int> saveGame(Game game) async {

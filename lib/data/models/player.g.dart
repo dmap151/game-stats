@@ -17,13 +17,28 @@ const PlayerSchema = CollectionSchema(
   name: r'Player',
   id: -1052842935974721688,
   properties: {
-    r'imagePath': PropertySchema(
+    r'friendCode': PropertySchema(
       id: 0,
+      name: r'friendCode',
+      type: IsarType.string,
+    ),
+    r'imagePath': PropertySchema(
+      id: 1,
       name: r'imagePath',
       type: IsarType.string,
     ),
+    r'isMe': PropertySchema(
+      id: 2,
+      name: r'isMe',
+      type: IsarType.bool,
+    ),
+    r'linkedUserId': PropertySchema(
+      id: 3,
+      name: r'linkedUserId',
+      type: IsarType.string,
+    ),
     r'name': PropertySchema(
-      id: 1,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     )
@@ -63,7 +78,19 @@ int _playerEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.friendCode;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.imagePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.linkedUserId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -78,8 +105,11 @@ void _playerSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.imagePath);
-  writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[0], object.friendCode);
+  writer.writeString(offsets[1], object.imagePath);
+  writer.writeBool(offsets[2], object.isMe);
+  writer.writeString(offsets[3], object.linkedUserId);
+  writer.writeString(offsets[4], object.name);
 }
 
 Player _playerDeserialize(
@@ -89,9 +119,12 @@ Player _playerDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Player();
+  object.friendCode = reader.readStringOrNull(offsets[0]);
   object.id = id;
-  object.imagePath = reader.readStringOrNull(offsets[0]);
-  object.name = reader.readString(offsets[1]);
+  object.imagePath = reader.readStringOrNull(offsets[1]);
+  object.isMe = reader.readBool(offsets[2]);
+  object.linkedUserId = reader.readStringOrNull(offsets[3]);
+  object.name = reader.readString(offsets[4]);
   return object;
 }
 
@@ -105,6 +138,12 @@ P _playerDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
+      return (reader.readStringOrNull(offset)) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -296,6 +335,152 @@ extension PlayerQueryWhere on QueryBuilder<Player, Player, QWhereClause> {
 }
 
 extension PlayerQueryFilter on QueryBuilder<Player, Player, QFilterCondition> {
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'friendCode',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'friendCode',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'friendCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'friendCode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'friendCode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'friendCode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> friendCodeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'friendCode',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -494,6 +679,161 @@ extension PlayerQueryFilter on QueryBuilder<Player, Player, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterFilterCondition> isMeEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isMe',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'linkedUserId',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'linkedUserId',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'linkedUserId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'linkedUserId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'linkedUserId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> linkedUserIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'linkedUserId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -629,6 +969,18 @@ extension PlayerQueryObject on QueryBuilder<Player, Player, QFilterCondition> {}
 extension PlayerQueryLinks on QueryBuilder<Player, Player, QFilterCondition> {}
 
 extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
+  QueryBuilder<Player, Player, QAfterSortBy> sortByFriendCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'friendCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByFriendCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'friendCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> sortByImagePath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'imagePath', Sort.asc);
@@ -638,6 +990,30 @@ extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
   QueryBuilder<Player, Player, QAfterSortBy> sortByImagePathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'imagePath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByIsMe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isMe', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByIsMeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isMe', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByLinkedUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'linkedUserId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByLinkedUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'linkedUserId', Sort.desc);
     });
   }
 
@@ -655,6 +1031,18 @@ extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
 }
 
 extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
+  QueryBuilder<Player, Player, QAfterSortBy> thenByFriendCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'friendCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByFriendCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'friendCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -679,6 +1067,30 @@ extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterSortBy> thenByIsMe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isMe', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByIsMeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isMe', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByLinkedUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'linkedUserId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByLinkedUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'linkedUserId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -693,10 +1105,30 @@ extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
 }
 
 extension PlayerQueryWhereDistinct on QueryBuilder<Player, Player, QDistinct> {
+  QueryBuilder<Player, Player, QDistinct> distinctByFriendCode(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'friendCode', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Player, Player, QDistinct> distinctByImagePath(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'imagePath', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Player, Player, QDistinct> distinctByIsMe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isMe');
+    });
+  }
+
+  QueryBuilder<Player, Player, QDistinct> distinctByLinkedUserId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'linkedUserId', caseSensitive: caseSensitive);
     });
   }
 
@@ -715,9 +1147,27 @@ extension PlayerQueryProperty on QueryBuilder<Player, Player, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Player, String?, QQueryOperations> friendCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'friendCode');
+    });
+  }
+
   QueryBuilder<Player, String?, QQueryOperations> imagePathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imagePath');
+    });
+  }
+
+  QueryBuilder<Player, bool, QQueryOperations> isMeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isMe');
+    });
+  }
+
+  QueryBuilder<Player, String?, QQueryOperations> linkedUserIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'linkedUserId');
     });
   }
 

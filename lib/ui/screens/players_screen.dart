@@ -267,13 +267,54 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                             ),
                     ),
                   ),
-                  title: Text(
-                    player.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  title: (!player.isMe && player.linkedUserId == null)
+                      ? Text(
+                          player.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                player.name,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (player.isMe) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'ICH',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (player.linkedUserId != null) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.link_rounded,
+                                size: 16,
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ],
+                          ],
+                        ),
                   subtitle: Text(
                     subtitleText,
                   ),

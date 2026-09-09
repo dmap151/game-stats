@@ -76,6 +76,25 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       }
     } else {
       _playerEntries.add(_PlayerEntryForm());
+      _loadMyPlayerDefault();
+    }
+  }
+
+  Future<void> _loadMyPlayerDefault() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final myPlayer = await db.getMyPlayer();
+      if (myPlayer != null && mounted && widget.existingMatch == null) {
+        if (_playerEntries.isNotEmpty &&
+            (_playerEntries[0].playerName == null || _playerEntries[0].playerName!.isEmpty)) {
+          setState(() {
+            _playerEntries[0].playerId = myPlayer.id;
+            _playerEntries[0].playerName = myPlayer.name;
+          });
+        }
+      }
+    } catch (_) {
+      // Gracefully ignore in test environments where DatabaseService is uninitialized
     }
   }
 
@@ -233,6 +252,11 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
       }
 
       final scores = <PlayerScore>[];
+      String? currentUserId;
+      try {
+        currentUserId = ref.read(supabaseServiceProvider).currentUser?.id;
+      } catch (_) {}
+
       for (var e in _playerEntries) {
         final pName = e.playerName!.trim();
         var player = await db.getPlayerByName(pName);
@@ -241,12 +265,19 @@ class _MatchEntryScreenState extends ConsumerState<MatchEntryScreen> {
           final id = await db.savePlayer(player);
           player.id = id;
         }
+
+        String? linkedUserId = player.linkedUserId;
+        if (player.isMe && currentUserId != null) {
+          linkedUserId ??= currentUserId;
+        }
+
         scores.add(
           PlayerScore()
             ..playerId = player.id
             ..playerName = player.name
             ..placement = e.placement
             ..score = e.score
+            ..linkedUserId = linkedUserId,
         );
       }
 

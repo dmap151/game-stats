@@ -7,7 +7,7 @@ part of 'match_record.dart';
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types, experimental_member_use, experimental_member_use_from_same_package
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
 extension GetMatchRecordCollection on Isar {
   IsarCollection<MatchRecord> get matchRecords => this.collection();
@@ -1343,23 +1343,28 @@ const PlayerScoreSchema = Schema(
   name: r'PlayerScore',
   id: 2297535275541076806,
   properties: {
-    r'placement': PropertySchema(
+    r'linkedUserId': PropertySchema(
       id: 0,
+      name: r'linkedUserId',
+      type: IsarType.string,
+    ),
+    r'placement': PropertySchema(
+      id: 1,
       name: r'placement',
       type: IsarType.long,
     ),
     r'playerId': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'playerId',
       type: IsarType.long,
     ),
     r'playerName': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'playerName',
       type: IsarType.string,
     ),
     r'score': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'score',
       type: IsarType.long,
     )
@@ -1377,6 +1382,12 @@ int _playerScoreEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.linkedUserId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.playerName;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -1391,10 +1402,11 @@ void _playerScoreSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.placement);
-  writer.writeLong(offsets[1], object.playerId);
-  writer.writeString(offsets[2], object.playerName);
-  writer.writeLong(offsets[3], object.score);
+  writer.writeString(offsets[0], object.linkedUserId);
+  writer.writeLong(offsets[1], object.placement);
+  writer.writeLong(offsets[2], object.playerId);
+  writer.writeString(offsets[3], object.playerName);
+  writer.writeLong(offsets[4], object.score);
 }
 
 PlayerScore _playerScoreDeserialize(
@@ -1404,10 +1416,11 @@ PlayerScore _playerScoreDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = PlayerScore();
-  object.placement = reader.readLong(offsets[0]);
-  object.playerId = reader.readLongOrNull(offsets[1]);
-  object.playerName = reader.readStringOrNull(offsets[2]);
-  object.score = reader.readLongOrNull(offsets[3]);
+  object.linkedUserId = reader.readStringOrNull(offsets[0]);
+  object.placement = reader.readLong(offsets[1]);
+  object.playerId = reader.readLongOrNull(offsets[2]);
+  object.playerName = reader.readStringOrNull(offsets[3]);
+  object.score = reader.readLongOrNull(offsets[4]);
   return object;
 }
 
@@ -1419,12 +1432,14 @@ P _playerScoreDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
-    case 1:
-      return (reader.readLongOrNull(offset)) as P;
-    case 2:
       return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
+      return (reader.readLongOrNull(offset)) as P;
     case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1433,6 +1448,160 @@ P _playerScoreDeserializeProp<P>(
 
 extension PlayerScoreQueryFilter
     on QueryBuilder<PlayerScore, PlayerScore, QFilterCondition> {
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'linkedUserId',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'linkedUserId',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'linkedUserId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'linkedUserId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'linkedUserId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'linkedUserId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
+      linkedUserIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'linkedUserId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<PlayerScore, PlayerScore, QAfterFilterCondition>
       placementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {

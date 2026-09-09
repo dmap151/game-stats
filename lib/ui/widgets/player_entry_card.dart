@@ -100,9 +100,42 @@ class PlayerEntryCard extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
-                                          child: Text(
-                                            option,
-                                            style: theme.textTheme.bodyLarge,
+                                          child: Row(
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  option,
+                                                  style: theme.textTheme.bodyLarge,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              if (player.isMe) ...[
+                                                const SizedBox(width: 6),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.colorScheme.primaryContainer,
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: Text(
+                                                    'ICH',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: theme.colorScheme.onPrimaryContainer,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                              if (player.linkedUserId != null) ...[
+                                                const SizedBox(width: 4),
+                                                Icon(
+                                                  Icons.link_rounded,
+                                                  size: 14,
+                                                  color: theme.colorScheme.secondary,
+                                                ),
+                                              ],
+                                            ],
                                           ),
                                         ),
                                       ],
