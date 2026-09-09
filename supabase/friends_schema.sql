@@ -148,17 +148,91 @@ CREATE POLICY "Users can delete friendships"
     TO authenticated
     USING (auth.uid() = user_id OR auth.uid() = friend_id);
 
--- 7. RLS Policy für Matches erweitern: Auch verknüpfte Mitspieler dürfen die Partie sehen!
+-- 7. Hilfsfunktionen mit SECURITY DEFINER zur Vermeidung von RLS-Rekursion
+CREATE OR REPLACE FUNCTION public.user_is_match_participant(p_match_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.match_player_scores
+        WHERE match_id = p_match_id
+        AND linked_user_id = p_user_id
+    );
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_match_owner(p_match_id UUID)
+RETURNS UUID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+    SELECT user_id FROM public.matches WHERE id = p_match_id;
+$$;
+
+-- 8. RLS Policies für Matches (Rekursionsfrei)
 DROP POLICY IF EXISTS "Users can manage their own matches" ON public.matches;
-CREATE POLICY "Users can manage their own matches"
-    ON public.matches FOR ALL
+DROP POLICY IF EXISTS "Users can read own or participated matches" ON public.matches;
+DROP POLICY IF EXISTS "Users can read matches" ON public.matches;
+DROP POLICY IF EXISTS "Users can insert matches" ON public.matches;
+DROP POLICY IF EXISTS "Users can update matches" ON public.matches;
+DROP POLICY IF EXISTS "Users can delete matches" ON public.matches;
+
+CREATE POLICY "Users can read matches"
+    ON public.matches FOR SELECT
     TO authenticated
     USING (
         auth.uid() = user_id 
-        OR EXISTS (
-            SELECT 1 FROM public.match_player_scores s
-            WHERE s.match_id = matches.id 
-            AND s.linked_user_id = auth.uid()
-        )
-    )
+        OR public.user_is_match_participant(id, auth.uid())
+    );
+
+CREATE POLICY "Users can insert matches"
+    ON public.matches FOR INSERT
+    TO authenticated
     WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update matches"
+    ON public.matches FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete matches"
+    ON public.matches FOR DELETE
+    TO authenticated
+    USING (auth.uid() = user_id);
+
+-- 9. RLS Policies für Match Player Scores (Rekursionsfrei)
+DROP POLICY IF EXISTS "Users can manage scores of their matches" ON public.match_player_scores;
+DROP POLICY IF EXISTS "Users can read match scores" ON public.match_player_scores;
+DROP POLICY IF EXISTS "Users can insert match scores" ON public.match_player_scores;
+DROP POLICY IF EXISTS "Users can update match scores" ON public.match_player_scores;
+DROP POLICY IF EXISTS "Users can delete match scores" ON public.match_player_scores;
+
+CREATE POLICY "Users can read match scores"
+    ON public.match_player_scores FOR SELECT
+    TO authenticated
+    USING (
+        linked_user_id = auth.uid()
+        OR public.get_match_owner(match_id) = auth.uid()
+    );
+
+CREATE POLICY "Users can insert match scores"
+    ON public.match_player_scores FOR INSERT
+    TO authenticated
+    WITH CHECK (public.get_match_owner(match_id) = auth.uid());
+
+CREATE POLICY "Users can update match scores"
+    ON public.match_player_scores FOR UPDATE
+    TO authenticated
+    USING (public.get_match_owner(match_id) = auth.uid())
+    WITH CHECK (public.get_match_owner(match_id) = auth.uid());
+
+CREATE POLICY "Users can delete match scores"
+    ON public.match_player_scores FOR DELETE
+    TO authenticated
+    USING (public.get_match_owner(match_id) = auth.uid());
+

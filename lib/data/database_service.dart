@@ -9,18 +9,17 @@ import 'models/player.dart';
 class DatabaseService {
   late Isar isar;
   String? _currentUserId;
-  final Future<Directory> Function()? _baseDirProvider;
+  final Future<Directory> Function()? baseDirProvider;
 
-  DatabaseService({Future<Directory> Function()? baseDirProvider})
-      : _baseDirProvider = baseDirProvider;
+  DatabaseService({this.baseDirProvider});
 
   String? get currentUserId => _currentUserId;
 
   /// Initializes the Isar database for a specific user, or guest if userId is null.
   Future<void> init({String? userId}) async {
     _currentUserId = userId;
-    final baseDir = _baseDirProvider != null
-        ? await _baseDirProvider()
+    final baseDir = baseDirProvider != null
+        ? await baseDirProvider!()
         : await getApplicationDocumentsDirectory();
     final String instanceName = userId != null
         ? 'user_${userId.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_')}'
