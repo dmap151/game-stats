@@ -64,11 +64,12 @@ class AccountScreen extends ConsumerWidget {
     User user,
     SyncState syncState,
   ) {
-    final userEmail = user.email ?? 'Angemeldet';
+    final l10n = context.l10n;
+    final userEmail = user.email ?? l10n.accountLoggedInStatus;
     final userInitial = userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'U';
     final lastSyncString = syncState.lastSyncTime != null
         ? DateFormat('dd.MM.yyyy HH:mm').format(syncState.lastSyncTime!)
-        : 'Noch nicht synchronisiert';
+        : l10n.syncNever;
 
     final myProfileAsync = ref.watch(myProfileProvider);
     final myPlayerAsync = ref.watch(myPlayerProvider);
@@ -135,7 +136,7 @@ class AccountScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Supabase Cloud aktiv',
+                      l10n.cloudActive,
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.w600,
@@ -168,7 +169,7 @@ class AccountScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Dein Freundes-Code',
+                              l10n.yourFriendCode,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -186,12 +187,12 @@ class AccountScreen extends ConsumerWidget {
                         const SizedBox(width: 14),
                         IconButton.filledTonal(
                           icon: const Icon(Icons.copy_rounded, size: 18),
-                          tooltip: 'Code kopieren',
+                          tooltip: l10n.copyCodeTooltip,
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: profile.friendCode));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Freundes-Code in Zwischenablage kopiert!'),
+                              SnackBar(
+                                content: Text(l10n.friendCodeCopied),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -236,7 +237,7 @@ class AccountScreen extends ConsumerWidget {
                   Icon(Icons.person_pin_circle_rounded, color: theme.colorScheme.primary, size: 24),
                   const SizedBox(width: 10),
                   Text(
-                    'Mein lokales Spielerprofil',
+                    l10n.myLocalProfileTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -245,7 +246,7 @@ class AccountScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Wähle aus, welcher lokale Spieler "Du" bist. Bei neuen Partien wirst du automatisch vorausgewählt.',
+                l10n.myLocalProfileDescription,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -288,13 +289,13 @@ class AccountScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                myPlayer?.name ?? 'Kein Profil ausgewählt',
+                                myPlayer?.name ?? l10n.noProfileSelected,
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                myPlayer != null ? 'Als "ICH" markiert' : 'Tippe zum Auswählen',
+                                myPlayer != null ? l10n.markedAsMe : l10n.tapToSelect,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: myPlayer != null
                                       ? theme.colorScheme.primary
@@ -306,7 +307,7 @@ class AccountScreen extends ConsumerWidget {
                         ),
                         FilledButton.tonal(
                           onPressed: () => _showSelectMyPlayerSheet(context, ref, allPlayers),
-                          child: Text(myPlayer != null ? 'Ändern' : 'Auswählen'),
+                          child: Text(myPlayer != null ? l10n.change : l10n.select),
                         ),
                       ],
                     ),
@@ -343,7 +344,7 @@ class AccountScreen extends ConsumerWidget {
                       Icon(Icons.people_alt_rounded, color: theme.colorScheme.primary, size: 24),
                       const SizedBox(width: 10),
                       Text(
-                        'Freunde',
+                        l10n.friendsSectionTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -353,7 +354,7 @@ class AccountScreen extends ConsumerWidget {
                   OutlinedButton.icon(
                     onPressed: () => _showAddFriendDialog(context, ref),
                     icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: const Text('Hinzufügen'),
+                    label: Text(l10n.add),
                     style: OutlinedButton.styleFrom(
                       visualDensity: VisualDensity.compact,
                       shape: RoundedRectangleBorder(
@@ -365,7 +366,7 @@ class AccountScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Füge Freunde über ihren Freundes-Code hinzu. Verknüpfe sie mit deinen lokalen Spielern, um Partien zu teilen.',
+                l10n.friendsSectionDescription,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -393,7 +394,7 @@ class AccountScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Noch keine Freunde hinzugefügt',
+                            l10n.noFriendsYet,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
@@ -401,7 +402,7 @@ class AccountScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Tippe auf "Hinzufügen", um einen Freundes-Code einzugeben.',
+                            l10n.noFriendsPrompt,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -470,8 +471,8 @@ class AccountScreen extends ConsumerWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     linkedPlayer != null
-                                        ? 'Verknüpft: ${linkedPlayer.name}'
-                                        : 'Nicht verknüpft',
+                                        ? l10n.linkedPlayer(linkedPlayer.name)
+                                        : l10n.notLinked,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: linkedPlayer != null
                                           ? theme.colorScheme.primary
@@ -489,8 +490,8 @@ class AccountScreen extends ConsumerWidget {
                                     : theme.colorScheme.onSurfaceVariant,
                               ),
                               tooltip: linkedPlayer != null
-                                  ? 'Verknüpfung verwalten'
-                                  : 'Mit lokalem Spieler verknüpfen',
+                                  ? l10n.manageLinkTooltip
+                                  : l10n.linkToLocalPlayerTooltip,
                               onPressed: () => _showLinkFriendSheet(
                                 context,
                                 ref,
@@ -502,24 +503,24 @@ class AccountScreen extends ConsumerWidget {
                             IconButton(
                               icon: const Icon(Icons.person_remove_outlined, size: 20),
                               color: theme.colorScheme.error,
-                              tooltip: 'Freund entfernen',
+                              tooltip: l10n.remove,
                               onPressed: () async {
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
-                                    title: const Text('Freund entfernen'),
-                                    content: Text('${friend.displayName} wirklich aus deinen Freunden entfernen?'),
+                                    title: Text(l10n.removeFriendTitle),
+                                    content: Text(l10n.removeFriendPrompt(friend.displayName)),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx, false),
-                                        child: const Text('Abbrechen'),
+                                        child: Text(l10n.cancel),
                                       ),
                                       FilledButton(
                                         style: FilledButton.styleFrom(
                                           backgroundColor: theme.colorScheme.error,
                                         ),
                                         onPressed: () => Navigator.pop(ctx, true),
-                                        child: const Text('Entfernen'),
+                                        child: Text(l10n.remove),
                                       ),
                                     ],
                                   ),
@@ -575,7 +576,7 @@ class AccountScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Online Synchronisation',
+                    l10n.syncSectionTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -584,7 +585,7 @@ class AccountScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Zuletzt synchronisiert: $lastSyncString',
+                l10n.lastSyncedAt(lastSyncString),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -617,8 +618,8 @@ class AccountScreen extends ConsumerWidget {
                       : const Icon(Icons.sync_rounded),
                   label: Text(
                     syncState.status == SyncStatus.syncing
-                        ? 'Synchronisiere...'
-                        : 'Jetzt synchronisieren',
+                        ? l10n.syncing
+                        : l10n.syncNow,
                   ),
                 ),
               ),
@@ -634,8 +635,8 @@ class AccountScreen extends ConsumerWidget {
                         SnackBar(
                           content: Text(
                             deleted > 0
-                                ? '$deleted doppelte Partien entfernt.'
-                                : 'Keine Duplikate vorhanden.',
+                                ? l10n.duplicatesRemoved(deleted)
+                                : l10n.noDuplicatesFound,
                           ),
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -643,7 +644,7 @@ class AccountScreen extends ConsumerWidget {
                     }
                   },
                   icon: const Icon(Icons.cleaning_services_outlined, size: 18),
-                  label: const Text('Doppelte Partien bereinigen'),
+                  label: Text(l10n.cleanDuplicates),
                 ),
               ),
             ],
@@ -660,8 +661,8 @@ class AccountScreen extends ConsumerWidget {
               await ref.read(supabaseServiceProvider).signOut();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Erfolgreich abgemeldet.'),
+                  SnackBar(
+                    content: Text(l10n.signOutSuccess),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -678,9 +679,9 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
             icon: const Icon(Icons.logout_rounded),
-            label: const Text(
-              'Abmelden',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            label: Text(
+              l10n.signOut,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -694,6 +695,7 @@ class AccountScreen extends ConsumerWidget {
     List<Player> allPlayers,
   ) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -708,23 +710,23 @@ class AccountScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Wähle dein Spielerprofil',
+                l10n.selectMyPlayerTitle,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                'Dies verknüpft deinen Account mit deinen Statistiken.',
+                l10n.selectMyPlayerSubtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const Divider(height: 24),
               if (allPlayers.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text('Noch keine lokalen Spieler vorhanden.'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(l10n.noLocalPlayersYet),
                 )
               else
                 Flexible(
@@ -760,13 +762,22 @@ class AccountScreen extends ConsumerWidget {
                             : null,
                         onTap: () async {
                           final db = ref.read(databaseProvider);
-                          await db.setMyPlayer(p.id);
                           final user = ref.read(currentUserProvider);
+                          final myProfile = ref.read(myProfileProvider).value;
+                          await db.setMyPlayer(
+                            p.id,
+                            linkedUserId: user?.id,
+                            friendCode: myProfile?.friendCode,
+                          );
                           if (user != null) {
-                            p.linkedUserId = user.id;
-                            await db.savePlayer(p);
+                            try {
+                              final friendsService = ref.read(friendsServiceProvider);
+                              await friendsService.updateProfile(displayName: p.name);
+                              ref.invalidate(myProfileProvider);
+                            } catch (_) {}
                           }
                           ref.invalidate(myPlayerProvider);
+                          ref.invalidate(playersProvider);
                           if (ctx.mounted) Navigator.pop(ctx);
                         },
                       );
@@ -781,6 +792,7 @@ class AccountScreen extends ConsumerWidget {
   }
 
   void _showAddFriendDialog(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final codeController = TextEditingController();
     bool isLoading = false;
     String? errorText;
@@ -790,12 +802,12 @@ class AccountScreen extends ConsumerWidget {
       builder: (dialogCtx) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text('Freund hinzufügen'),
+            title: Text(l10n.addFriend),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Gib den Freundes-Code ein (z. B. #NAME-1234):'),
+                Text(l10n.enterFriendCodePrompt),
                 const SizedBox(height: 14),
                 TextField(
                   controller: codeController,
@@ -803,6 +815,7 @@ class AccountScreen extends ConsumerWidget {
                   textCapitalization: TextCapitalization.characters,
                   decoration: InputDecoration(
                     hintText: '#NAME-1234',
+                    labelText: l10n.friendCodeLabel,
                     prefixIcon: const Icon(Icons.tag_rounded),
                     errorText: errorText,
                     border: const OutlineInputBorder(),
@@ -813,7 +826,7 @@ class AccountScreen extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: isLoading ? null : () => Navigator.pop(dialogCtx),
-                child: const Text('Abbrechen'),
+                child: Text(l10n.cancel),
               ),
               FilledButton(
                 onPressed: isLoading
@@ -821,7 +834,7 @@ class AccountScreen extends ConsumerWidget {
                     : () async {
                         final code = codeController.text.trim();
                         if (code.isEmpty) {
-                          setDialogState(() => errorText = 'Bitte Code eingeben');
+                          setDialogState(() => errorText = l10n.invalidOrOwnFriendCode);
                           return;
                         }
 
@@ -836,7 +849,7 @@ class AccountScreen extends ConsumerWidget {
                           if (found == null) {
                             setDialogState(() {
                               isLoading = false;
-                              errorText = 'Kein Spieler mit diesem Code gefunden.';
+                              errorText = l10n.friendNotFound;
                             });
                             return;
                           }
@@ -848,7 +861,7 @@ class AccountScreen extends ConsumerWidget {
                             Navigator.pop(dialogCtx);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${found.displayName} wurde als Freund hinzugefügt!'),
+                                content: Text(l10n.friendAddedSuccess),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -866,7 +879,7 @@ class AccountScreen extends ConsumerWidget {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Hinzufügen'),
+                    : Text(l10n.add),
               ),
             ],
           );
@@ -883,6 +896,7 @@ class AccountScreen extends ConsumerWidget {
     List<Player> allPlayers,
   ) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -897,14 +911,14 @@ class AccountScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${friend.displayName} verknüpfen',
+                l10n.linkFriendTitle(friend.displayName),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                'Wähle einen lokalen Spieler aus oder erstelle einen neuen, der mit diesem Freund synchronisiert wird.',
+                l10n.linkFriendDescription,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -914,7 +928,7 @@ class AccountScreen extends ConsumerWidget {
                 leading: const CircleAvatar(
                   child: Icon(Icons.person_add_rounded),
                 ),
-                title: Text('Neuen Spieler für "${friend.displayName}" anlegen'),
+                title: Text(l10n.createNewPlayerFor(friend.displayName)),
                 onTap: () async {
                   final db = ref.read(databaseProvider);
                   final newPlayer = Player()
@@ -933,7 +947,7 @@ class AccountScreen extends ConsumerWidget {
                     backgroundColor: theme.colorScheme.errorContainer,
                     child: Icon(Icons.link_off_rounded, color: theme.colorScheme.onErrorContainer),
                   ),
-                  title: Text('Verknüpfung mit "${currentLinkedPlayer.name}" aufheben'),
+                  title: Text(l10n.unlinkPlayerFrom(currentLinkedPlayer.name)),
                   onTap: () async {
                     final db = ref.read(databaseProvider);
                     await db.unlinkPlayer(currentLinkedPlayer.id);
@@ -968,7 +982,7 @@ class AccountScreen extends ConsumerWidget {
                       ),
                       title: Text(p.name),
                       subtitle: p.friendCode != null
-                          ? Text('Bereits verknüpft mit ${p.friendCode}')
+                          ? Text(l10n.alreadyLinkedWith(p.friendCode!))
                           : null,
                       trailing: isLinked
                           ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
@@ -999,6 +1013,7 @@ class AccountScreen extends ConsumerWidget {
     WidgetRef ref,
     ThemeData theme,
   ) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -1025,7 +1040,7 @@ class AccountScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Konto & Cloud-Sync',
+            l10n.cloudAndFriendsTitle,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -1033,7 +1048,7 @@ class AccountScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Melde dich mit Google oder E-Mail an, um deine Partien, Spieler und Statistiken sicher online zu sichern.',
+            l10n.cloudAndFriendsDescription,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -1050,9 +1065,9 @@ class AccountScreen extends ConsumerWidget {
                 );
               },
               icon: const Icon(Icons.login_rounded),
-              label: const Text(
-                'Anmelden / Registrieren',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              label: Text(
+                l10n.signInOrRegister,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1068,6 +1083,7 @@ class AccountScreen extends ConsumerWidget {
   }
 
   Widget _buildDuelsCard(BuildContext context, ThemeData theme) {
+    final l10n = context.l10n;
     return Material(
       color: theme.colorScheme.surfaceContainer,
       clipBehavior: Clip.antiAlias,
@@ -1091,11 +1107,11 @@ class AccountScreen extends ConsumerWidget {
             color: theme.colorScheme.onSecondaryContainer,
           ),
         ),
-        title: const Text(
-          'Duelle & Spielervergleich',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.duelsTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: const Text('Head-to-Head Statistiken zweier Spieler anzeigen'),
+        subtitle: Text(l10n.duelsSubtitle),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
         onTap: () {
           Navigator.push<void>(

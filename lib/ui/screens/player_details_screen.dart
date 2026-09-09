@@ -47,22 +47,35 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
 
   Future<void> _setAsMyProfile() async {
     final db = ref.read(databaseProvider);
-    await db.setMyPlayer(_currentPlayer.id);
     final user = ref.read(currentUserProvider);
+    final myProfile = ref.read(myProfileProvider).value;
+    await db.setMyPlayer(
+      _currentPlayer.id,
+      linkedUserId: user?.id,
+      friendCode: myProfile?.friendCode,
+    );
     if (user != null) {
-      _currentPlayer.linkedUserId = user.id;
-      await db.savePlayer(_currentPlayer);
+      try {
+        final friendsService = ref.read(friendsServiceProvider);
+        await friendsService.updateProfile(displayName: _currentPlayer.name);
+        ref.invalidate(myProfileProvider);
+      } catch (_) {}
     }
     setState(() {
       _currentPlayer.isMe = true;
+      if (user != null) {
+        _currentPlayer.linkedUserId = user.id;
+        _currentPlayer.friendCode = myProfile?.friendCode;
+      }
     });
     ref.invalidate(playersProvider);
     ref.invalidate(myPlayerProvider);
 
     if (mounted) {
+      final l10n = context.l10n;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${_currentPlayer.name} ist jetzt als "ICH" festgelegt.'),
+          content: Text(l10n.playerSetAsMeSuccess(_currentPlayer.name)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -330,7 +343,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                         if (_currentPlayer.isMe)
                           Chip(
                             avatar: Icon(Icons.person_pin, size: 18, color: theme.colorScheme.onPrimaryContainer),
-                            label: const Text('ICH'),
+                            label: Text(l10n.meLabel),
                             backgroundColor: theme.colorScheme.primaryContainer,
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -340,13 +353,13 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                         else
                           ActionChip(
                             avatar: const Icon(Icons.person_pin_outlined, size: 18),
-                            label: const Text('Als "ICH" festlegen'),
+                            label: Text(l10n.setAsMe),
                             onPressed: _setAsMyProfile,
                           ),
                         if (_currentPlayer.linkedUserId != null)
                           Chip(
                             avatar: Icon(Icons.link_rounded, size: 18, color: theme.colorScheme.onSecondaryContainer),
-                            label: Text(_currentPlayer.friendCode ?? 'Freund verknüpft'),
+                            label: Text(_currentPlayer.friendCode ?? l10n.friendLinked),
                             backgroundColor: theme.colorScheme.secondaryContainer,
                             labelStyle: TextStyle(
                               color: theme.colorScheme.onSecondaryContainer,
@@ -358,7 +371,7 @@ class _PlayerDetailsScreenState extends ConsumerState<PlayerDetailsScreen> {
                         else if (!_currentPlayer.isMe)
                           ActionChip(
                             avatar: const Icon(Icons.link_rounded, size: 18),
-                            label: const Text('Mit Freund verknüpfen'),
+                            label: Text(l10n.linkWithFriend),
                             onPressed: _showLinkWithFriendSheet,
                           ),
                       ],

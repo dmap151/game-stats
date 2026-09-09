@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n_extension.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/supabase_service.dart';
 
@@ -30,6 +31,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
 
   Future<void> _handleEmailAuth() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = context.l10n;
 
     setState(() {
       _isLoading = true;
@@ -45,8 +47,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account erfolgreich erstellt! Bitte überprüfe deine E-Mails, falls eine Bestätigung nötig ist.'),
+            SnackBar(
+              content: Text(l10n.signUpSuccessMessage),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -59,8 +61,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Erfolgreich angemeldet!'),
+            SnackBar(
+              content: Text(l10n.signInSuccessMessage),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -81,6 +83,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    final l10n = context.l10n;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -91,8 +94,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
       await auth.signInWithGoogle();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erfolgreich mit Google angemeldet!'),
+          SnackBar(
+            content: Text(l10n.googleSignInSuccessMessage),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -116,6 +119,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -148,7 +152,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               ),
               const SizedBox(height: 16),
               Text(
-                _isSignUp ? 'Konto erstellen' : 'Willkommen zurück',
+                _isSignUp ? l10n.authCreateAccount : l10n.authWelcomeBack,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -157,8 +161,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               const SizedBox(height: 6),
               Text(
                 _isSignUp
-                    ? 'Erstelle ein Konto, um deine Statistiken in der Cloud zu sichern.'
-                    : 'Melde dich an, um deine Spieldaten online zu synchronisieren.',
+                    ? l10n.authSignUpSubtitle
+                    : l10n.authSignInSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -196,7 +200,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Mit Google fortfahren',
+                      l10n.continueWithGoogle,
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -218,7 +222,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
-                      'ODER',
+                      l10n.orDivider,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.outline,
                         letterSpacing: 1.2,
@@ -246,7 +250,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       decoration: InputDecoration(
-                        labelText: 'E-Mail',
+                        labelText: l10n.emailLabel,
                         prefixIcon: const Icon(Icons.mail_outline_rounded),
                         filled: true,
                         fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -257,10 +261,10 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Bitte gib deine E-Mail ein';
+                          return l10n.emailRequired;
                         }
                         if (!value.contains('@')) {
-                          return 'Ungültige E-Mail-Adresse';
+                          return l10n.emailInvalid;
                         }
                         return null;
                       },
@@ -270,7 +274,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Passwort',
+                        labelText: l10n.passwordLabel,
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -287,7 +291,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                       ),
                       validator: (value) {
                         if (value == null || value.length < 6) {
-                          return 'Mindestens 6 Zeichen erforderlich';
+                          return l10n.passwordTooShort;
                         }
                         return null;
                       },
@@ -337,7 +341,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                         child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
                       )
                     : Text(
-                        _isSignUp ? 'Registrieren' : 'Anmelden',
+                        _isSignUp ? l10n.signUp : l10n.signIn,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
               ),
@@ -356,8 +360,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                       },
                 child: Text(
                   _isSignUp
-                      ? 'Bereits ein Konto? Hier anmelden'
-                      : 'Noch kein Konto? Jetzt registrieren',
+                      ? l10n.haveAccountPrompt
+                      : l10n.noAccountPrompt,
                   style: TextStyle(color: theme.colorScheme.primary),
                 ),
               ),
@@ -366,7 +370,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  'Ohne Anmeldung fortfahren',
+                  l10n.continueWithoutSignIn,
                   style: TextStyle(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 13,

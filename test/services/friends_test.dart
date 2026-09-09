@@ -83,5 +83,12 @@ void main() {
       expect(match.playerScores[0].linkedUserId, 'david-user-id');
       expect(match.playerScores[1].linkedUserId, 'anna-user-id');
     });
+
+    test('Player model defaults isMe to false and fields to null', () {
+      final player = Player()..name = 'Test';
+      expect(player.isMe, isFalse);
+      expect(player.linkedUserId, isNull);
+      expect(player.friendCode, isNull);
+    });
   });
 }

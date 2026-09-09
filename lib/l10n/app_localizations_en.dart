@@ -633,4 +633,315 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationDisabledSubtitle => 'No location for this match';
+
+  @override
+  String get accountLoggedInStatus => 'Signed In';
+
+  @override
+  String get syncNever => 'Not yet synchronized';
+
+  @override
+  String get cloudActive => 'Supabase Cloud active';
+
+  @override
+  String get yourFriendCode => 'Your Friend Code';
+
+  @override
+  String get copyCodeTooltip => 'Copy code';
+
+  @override
+  String get friendCodeCopied => 'Friend code copied to clipboard!';
+
+  @override
+  String get myLocalProfileTitle => 'My Local Player Profile';
+
+  @override
+  String get myLocalProfileDescription =>
+      'Select which local player is \"You\". You will be automatically pre-selected in new matches.';
+
+  @override
+  String get noProfileSelected => 'No profile selected';
+
+  @override
+  String get markedAsMe => 'Marked as \"ME\"';
+
+  @override
+  String get tapToSelect => 'Tap to select';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get select => 'Select';
+
+  @override
+  String get friendsSectionTitle => 'Friends & Connections';
+
+  @override
+  String get friendsSectionDescription =>
+      'Manage your friends. When creating a match, you can select friends directly as co-players.';
+
+  @override
+  String get addFriend => 'Add friend';
+
+  @override
+  String get noFriendsYet => 'No friends added yet.';
+
+  @override
+  String get noFriendsPrompt =>
+      'Tap \"Add friend\" and enter their friend code.';
+
+  @override
+  String linkedPlayer(Object name) {
+    return 'Linked: $name';
+  }
+
+  @override
+  String get linkLocalPlayer => 'Link local player';
+
+  @override
+  String get removeFriendTitle => 'Remove friend?';
+
+  @override
+  String removeFriendPrompt(Object name) {
+    return 'Are you sure you want to remove $name from your friends list?';
+  }
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get syncSectionTitle => 'Sync & Cloud Backup';
+
+  @override
+  String get syncSectionDescription =>
+      'Matches, players, and photos are automatically saved to your cloud.';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncing => 'Syncing...';
+
+  @override
+  String lastSyncedAt(Object time) {
+    return 'Last synced: $time';
+  }
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get signOutConfirm =>
+      'Are you sure you want to sign out? Your local data will remain saved on this device.';
+
+  @override
+  String get cloudAndFriendsTitle => 'Cloud & Friends';
+
+  @override
+  String get cloudAndFriendsDescription =>
+      'Sign in to back up your game statistics online, access them across devices, and share matches with friends.';
+
+  @override
+  String get signInOrRegister => 'Sign In / Register now';
+
+  @override
+  String get cloudBenefitsTitle => 'Benefits of the Cloud:';
+
+  @override
+  String get cloudBenefit1 => 'Secure cloud backup for all matches and photos';
+
+  @override
+  String get cloudBenefit2 => 'Synchronization across multiple devices';
+
+  @override
+  String get cloudBenefit3 => 'Add friends and link match results';
+
+  @override
+  String get duelsTitle => 'Duel Mode';
+
+  @override
+  String get duelsCardDescription =>
+      'Compare two players head-to-head and see who has the most wins.';
+
+  @override
+  String get comparePlayersAction => 'Compare players';
+
+  @override
+  String get selectMyPlayerTitle => 'Select your player profile';
+
+  @override
+  String get selectMyPlayerSubtitle =>
+      'This links your account with your statistics.';
+
+  @override
+  String get noLocalPlayersYet => 'No local players found yet.';
+
+  @override
+  String get enterFriendCodePrompt =>
+      'Enter the friend code (e.g. #NAME-1234):';
+
+  @override
+  String get friendCodeLabel => 'Friend code';
+
+  @override
+  String get invalidOrOwnFriendCode => 'Invalid or own friend code.';
+
+  @override
+  String get friendNotFound => 'Profile not found.';
+
+  @override
+  String get friendAddedSuccess => 'Friend added successfully!';
+
+  @override
+  String get linkPlayerDialogTitle => 'Link player';
+
+  @override
+  String linkPlayerDialogSubtitle(Object name) {
+    return 'Select an existing local player or create a new one for $name:';
+  }
+
+  @override
+  String get createNewPlayer => 'Create new player';
+
+  @override
+  String get playerLinkedSuccess => 'Player linked!';
+
+  @override
+  String get meLabel => 'ME';
+
+  @override
+  String get setAsMe => 'Set as \"ME\"';
+
+  @override
+  String playerSetAsMeSuccess(Object player) {
+    return '$player is now set as \"ME\".';
+  }
+
+  @override
+  String get linkWithFriend => 'Link with friend';
+
+  @override
+  String get friendLinked => 'Friend linked';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get authWelcomeBack => 'Welcome back!';
+
+  @override
+  String get authCreateAccount => 'Create account';
+
+  @override
+  String get authSignInSubtitle => 'Sign in to synchronize your data.';
+
+  @override
+  String get authSignUpSubtitle => 'Create a free account for cloud sync.';
+
+  @override
+  String get emailLabel => 'Email address';
+
+  @override
+  String get emailRequired => 'Please enter an email address';
+
+  @override
+  String get emailInvalid => 'Please enter a valid email address';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get passwordRequired => 'Please enter a password';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get noAccountPrompt => 'Don\'t have an account? Sign up now';
+
+  @override
+  String get haveAccountPrompt => 'Already have an account? Sign in';
+
+  @override
+  String get signUpSuccessMessage =>
+      'Account created successfully! Please check your emails if verification is required.';
+
+  @override
+  String get signInSuccessMessage => 'Successfully signed in!';
+
+  @override
+  String get notLinked => 'Not linked';
+
+  @override
+  String get manageLinkTooltip => 'Manage link';
+
+  @override
+  String get linkToLocalPlayerTooltip => 'Link to local player';
+
+  @override
+  String get cleanDuplicates => 'Clean duplicate matches';
+
+  @override
+  String duplicatesRemoved(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duplicate matches removed.',
+      one: '1 duplicate match removed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noDuplicatesFound => 'No duplicates found.';
+
+  @override
+  String get signOutSuccess => 'Successfully signed out.';
+
+  @override
+  String linkFriendTitle(Object name) {
+    return 'Link \"$name\"';
+  }
+
+  @override
+  String get linkFriendDescription =>
+      'Select a local player or create a new one to synchronize with this friend.';
+
+  @override
+  String createNewPlayerFor(Object name) {
+    return 'Create new player for \"$name\"';
+  }
+
+  @override
+  String unlinkPlayerFrom(Object name) {
+    return 'Unlink from \"$name\"';
+  }
+
+  @override
+  String alreadyLinkedWith(Object code) {
+    return 'Already linked with $code';
+  }
+
+  @override
+  String get duelsSubtitle => 'View head-to-head statistics of two players';
+
+  @override
+  String get googleSignInSuccessMessage =>
+      'Successfully signed in with Google!';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get orDivider => 'OR';
+
+  @override
+  String get continueWithoutSignIn => 'Continue without signing in';
 }

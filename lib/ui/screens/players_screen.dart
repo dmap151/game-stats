@@ -296,7 +296,7 @@ class _PlayersScreenState extends ConsumerState<PlayersScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'ICH',
+                                  l10n.meLabel,
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,

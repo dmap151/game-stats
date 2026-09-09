@@ -399,27 +399,53 @@ class DatabaseService {
   }
 
   /// Returns the player designated as "Me" (current device user), if set.
-  Future<Player?> getMyPlayer() async {
-    return await isar.players.filter().isMeEqualTo(true).findFirst();
+  Future<Player?> getMyPlayer({String? currentUserId}) async {
+    final me = await isar.players.filter().isMeEqualTo(true).findFirst();
+    if (me != null) return me;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      return await isar.players.filter().linkedUserIdEqualTo(currentUserId).findFirst();
+    }
+    return null;
   }
 
   /// Returns a stream that emits the player designated as "Me", or null.
-  Stream<Player?> listenToMyPlayer() {
+  Stream<Player?> listenToMyPlayer({String? currentUserId}) {
     return isar.players
-        .filter()
-        .isMeEqualTo(true)
+        .where()
         .watch(fireImmediately: true)
-        .map((list) => list.isEmpty ? null : list.first);
+        .map((players) {
+          final me = players.where((p) => p.isMe).firstOrNull;
+          if (me != null) return me;
+          if (currentUserId != null && currentUserId.isNotEmpty) {
+            return players.where((p) => p.linkedUserId == currentUserId).firstOrNull;
+          }
+          return null;
+        });
   }
 
   /// Sets exactly one player as "Me" and unsets isMe on all other players.
-  Future<void> setMyPlayer(int playerId) async {
+  /// Also optionally associates the player with the Supabase auth user ID and friend code.
+  Future<void> setMyPlayer(int playerId, {String? linkedUserId, String? friendCode}) async {
     await isar.writeTxn(() async {
       final allPlayers = await isar.players.where().findAll();
       for (final p in allPlayers) {
         final shouldBeMe = p.id == playerId;
+        bool changed = false;
         if (p.isMe != shouldBeMe) {
           p.isMe = shouldBeMe;
+          changed = true;
+        }
+        if (shouldBeMe) {
+          if (linkedUserId != null && p.linkedUserId != linkedUserId) {
+            p.linkedUserId = linkedUserId;
+            changed = true;
+          }
+          if (friendCode != null && p.friendCode != friendCode) {
+            p.friendCode = friendCode;
+            changed = true;
+          }
+        }
+        if (changed) {
           await isar.players.put(p);
         }
       }

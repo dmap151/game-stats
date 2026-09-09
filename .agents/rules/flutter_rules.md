@@ -23,3 +23,9 @@ trigger: always_on
 - **Round Avatars**: All profile pictures and game thumbnails must be circular (`CircleAvatar` + `ClipOval(child: Image.file(...))`).
 - **No Hero Transitions**: Do not wrap thumbnails in `Hero` widgets.
 - **High Performance Image Loading**: Always pass `cacheWidth: 100-200` and `gaplessPlayback: true` to prevent memory thrashing on large camera images.
+
+## 4. Localization & Internationalization (l10n)
+- **Zero Hardcoded Strings**: Never hardcode user-facing strings in widgets.
+- **Dual Language Updates**: Always maintain both `lib/l10n/app_de.arb` and `lib/l10n/app_en.arb`.
+- Run `flutter gen-l10n` to regenerate `AppLocalizations`.
+- Use `context.l10n.<key>` via `import 'package:game_stats/l10n/l10n_extension.dart';`.

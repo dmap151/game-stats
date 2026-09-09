@@ -67,6 +67,22 @@ class FriendsService {
     return FriendProfile.fromMap(created);
   }
 
+  /// Updates the current user's profile display name or avatar.
+  Future<void> updateProfile({String? displayName, String? avatarUrl}) async {
+    final user = _supabase.currentUser;
+    if (user == null) return;
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (displayName != null && displayName.trim().isNotEmpty) {
+      updates['display_name'] = displayName.trim();
+    }
+    if (avatarUrl != null) {
+      updates['avatar_url'] = avatarUrl;
+    }
+    await _client.from('profiles').update(updates).eq('id', user.id);
+  }
+
   /// Searches for a user profile by friend code (e.g. #DAVI-4821).
   Future<FriendProfile?> searchByFriendCode(String code) async {
     final cleanCode = code.trim().toUpperCase();

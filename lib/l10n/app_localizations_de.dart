@@ -634,4 +634,319 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get locationDisabledSubtitle => 'Kein Standort für diese Partie';
+
+  @override
+  String get accountLoggedInStatus => 'Angemeldet';
+
+  @override
+  String get syncNever => 'Noch nicht synchronisiert';
+
+  @override
+  String get cloudActive => 'Supabase Cloud aktiv';
+
+  @override
+  String get yourFriendCode => 'Dein Freundes-Code';
+
+  @override
+  String get copyCodeTooltip => 'Code kopieren';
+
+  @override
+  String get friendCodeCopied => 'Freundes-Code in Zwischenablage kopiert!';
+
+  @override
+  String get myLocalProfileTitle => 'Mein lokales Spielerprofil';
+
+  @override
+  String get myLocalProfileDescription =>
+      'Wähle aus, welcher lokale Spieler \"Du\" bist. Bei neuen Partien wirst du automatisch vorausgewählt.';
+
+  @override
+  String get noProfileSelected => 'Kein Profil ausgewählt';
+
+  @override
+  String get markedAsMe => 'Als \"ICH\" markiert';
+
+  @override
+  String get tapToSelect => 'Tippe zum Auswählen';
+
+  @override
+  String get change => 'Ändern';
+
+  @override
+  String get select => 'Auswählen';
+
+  @override
+  String get friendsSectionTitle => 'Freunde & Vernetzung';
+
+  @override
+  String get friendsSectionDescription =>
+      'Verwalte deine Freunde. Wenn du eine Partie erstellst, kannst du Freunde direkt als Mitspieler auswählen.';
+
+  @override
+  String get addFriend => 'Freund hinzufügen';
+
+  @override
+  String get noFriendsYet => 'Noch keine Freunde hinzugefügt.';
+
+  @override
+  String get noFriendsPrompt =>
+      'Tippe auf \"Freund hinzufügen\" und gib den Freundes-Code ein.';
+
+  @override
+  String linkedPlayer(Object name) {
+    return 'Verknüpft: $name';
+  }
+
+  @override
+  String get linkLocalPlayer => 'Lokalen Spieler verknüpfen';
+
+  @override
+  String get removeFriendTitle => 'Freundschaft entfernen?';
+
+  @override
+  String removeFriendPrompt(Object name) {
+    return 'Möchtest du $name wirklich aus deiner Freundesliste entfernen?';
+  }
+
+  @override
+  String get remove => 'Entfernen';
+
+  @override
+  String get syncSectionTitle => 'Sync & Cloud-Sicherung';
+
+  @override
+  String get syncSectionDescription =>
+      'Partien, Spieler und Fotos werden automatisch in deiner Cloud gesichert.';
+
+  @override
+  String get syncNow => 'Jetzt synchronisieren';
+
+  @override
+  String get syncing => 'Synchronisiere...';
+
+  @override
+  String lastSyncedAt(Object time) {
+    return 'Zuletzt synchronisiert: $time';
+  }
+
+  @override
+  String get signOut => 'Abmelden';
+
+  @override
+  String get signOutConfirm =>
+      'Möchtest du dich wirklich abmelden? Deine lokalen Daten bleiben auf diesem Gerät gespeichert.';
+
+  @override
+  String get cloudAndFriendsTitle => 'Konto & Cloud-Sync';
+
+  @override
+  String get cloudAndFriendsDescription =>
+      'Melde dich an, um deine Spielstatistiken online zu sichern, geräteübergreifend abzurufen und Partien mit Freunden zu teilen.';
+
+  @override
+  String get signInOrRegister => 'Jetzt Anmelden / Registrieren';
+
+  @override
+  String get cloudBenefitsTitle => 'Vorteile der Cloud:';
+
+  @override
+  String get cloudBenefit1 =>
+      'Sicheres Cloud-Backup für alle Partien und Fotos';
+
+  @override
+  String get cloudBenefit2 => 'Synchronisation über mehrere Geräte';
+
+  @override
+  String get cloudBenefit3 =>
+      'Freunde hinzufügen und Spielergebnisse verknüpfen';
+
+  @override
+  String get duelsTitle => 'Duell-Modus';
+
+  @override
+  String get duelsCardDescription =>
+      'Vergleiche zwei Spieler direkt im Head-to-Head und sieh dir an, wer die meisten Siege hat.';
+
+  @override
+  String get comparePlayersAction => 'Spieler vergleichen';
+
+  @override
+  String get selectMyPlayerTitle => 'Wähle dein Spielerprofil';
+
+  @override
+  String get selectMyPlayerSubtitle =>
+      'Dies verknüpft deinen Account mit deinen Statistiken.';
+
+  @override
+  String get noLocalPlayersYet => 'Noch keine lokalen Spieler vorhanden.';
+
+  @override
+  String get enterFriendCodePrompt =>
+      'Gib den Freundes-Code ein (z. B. #NAME-1234):';
+
+  @override
+  String get friendCodeLabel => 'Freundes-Code';
+
+  @override
+  String get invalidOrOwnFriendCode => 'Ungültiger oder eigener Freundes-Code.';
+
+  @override
+  String get friendNotFound => 'Profil nicht gefunden.';
+
+  @override
+  String get friendAddedSuccess => 'Freund hinzugefügt!';
+
+  @override
+  String get linkPlayerDialogTitle => 'Spieler verknüpfen';
+
+  @override
+  String linkPlayerDialogSubtitle(Object name) {
+    return 'Wähle einen bestehenden lokalen Spieler aus oder erstelle einen neuen für $name:';
+  }
+
+  @override
+  String get createNewPlayer => 'Neuen Spieler erstellen';
+
+  @override
+  String get playerLinkedSuccess => 'Spieler verknüpft!';
+
+  @override
+  String get meLabel => 'ICH';
+
+  @override
+  String get setAsMe => 'Als \"ICH\" festlegen';
+
+  @override
+  String playerSetAsMeSuccess(Object player) {
+    return '$player ist jetzt als \"ICH\" festgelegt.';
+  }
+
+  @override
+  String get linkWithFriend => 'Mit Freund verknüpfen';
+
+  @override
+  String get friendLinked => 'Freund verknüpft';
+
+  @override
+  String get signIn => 'Anmelden';
+
+  @override
+  String get signUp => 'Registrieren';
+
+  @override
+  String get authWelcomeBack => 'Willkommen zurück!';
+
+  @override
+  String get authCreateAccount => 'Account erstellen';
+
+  @override
+  String get authSignInSubtitle =>
+      'Melde dich an, um deine Daten zu synchronisieren.';
+
+  @override
+  String get authSignUpSubtitle =>
+      'Erstelle einen kostenlosen Account für Cloud-Sync.';
+
+  @override
+  String get emailLabel => 'E-Mail-Adresse';
+
+  @override
+  String get emailRequired => 'Bitte gib eine E-Mail-Adresse ein';
+
+  @override
+  String get emailInvalid => 'Bitte gib eine gültige E-Mail-Adresse ein';
+
+  @override
+  String get passwordLabel => 'Passwort';
+
+  @override
+  String get passwordRequired => 'Bitte gib ein Passwort ein';
+
+  @override
+  String get passwordTooShort => 'Passwort muss mindestens 6 Zeichen lang sein';
+
+  @override
+  String get forgotPassword => 'Passwort vergessen?';
+
+  @override
+  String get noAccountPrompt => 'Noch kein Account? Jetzt registrieren';
+
+  @override
+  String get haveAccountPrompt => 'Bereits registriert? Jetzt anmelden';
+
+  @override
+  String get signUpSuccessMessage =>
+      'Account erfolgreich erstellt! Bitte überprüfe deine E-Mails, falls eine Bestätigung nötig ist.';
+
+  @override
+  String get signInSuccessMessage => 'Erfolgreich angemeldet!';
+
+  @override
+  String get notLinked => 'Nicht verknüpft';
+
+  @override
+  String get manageLinkTooltip => 'Verknüpfung verwalten';
+
+  @override
+  String get linkToLocalPlayerTooltip => 'Mit lokalem Spieler verknüpfen';
+
+  @override
+  String get cleanDuplicates => 'Doppelte Partien bereinigen';
+
+  @override
+  String duplicatesRemoved(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count doppelte Partien entfernt.',
+      one: '1 doppelte Partie entfernt.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noDuplicatesFound => 'Keine Duplikate vorhanden.';
+
+  @override
+  String get signOutSuccess => 'Erfolgreich abgemeldet.';
+
+  @override
+  String linkFriendTitle(Object name) {
+    return '\"$name\" verknüpfen';
+  }
+
+  @override
+  String get linkFriendDescription =>
+      'Wähle einen lokalen Spieler aus oder erstelle einen neuen, der mit diesem Freund synchronisiert wird.';
+
+  @override
+  String createNewPlayerFor(Object name) {
+    return 'Neuen Spieler für \"$name\" anlegen';
+  }
+
+  @override
+  String unlinkPlayerFrom(Object name) {
+    return 'Verknüpfung mit \"$name\" aufheben';
+  }
+
+  @override
+  String alreadyLinkedWith(Object code) {
+    return 'Bereits verknüpft mit $code';
+  }
+
+  @override
+  String get duelsSubtitle =>
+      'Head-to-Head Statistiken zweier Spieler anzeigen';
+
+  @override
+  String get googleSignInSuccessMessage => 'Erfolgreich mit Google angemeldet!';
+
+  @override
+  String get continueWithGoogle => 'Mit Google fortfahren';
+
+  @override
+  String get orDivider => 'ODER';
+
+  @override
+  String get continueWithoutSignIn => 'Ohne Anmeldung fortfahren';
 }

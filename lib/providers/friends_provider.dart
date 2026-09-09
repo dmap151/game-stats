@@ -26,6 +26,6 @@ final friendsListProvider = FutureProvider<List<FriendProfile>>((ref) async {
 /// Streams the local player marked as "Me", or null if not yet selected.
 final myPlayerProvider = StreamProvider<Player?>((ref) {
   final db = ref.watch(databaseProvider);
-  ref.watch(currentUserProvider);
-  return db.listenToMyPlayer();
+  final user = ref.watch(currentUserProvider);
+  return db.listenToMyPlayer(currentUserId: user?.id);
 });

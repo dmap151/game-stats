@@ -70,6 +70,12 @@ lib/
 - Use `LocationService.getAddress(lat, lng)` to resolve human-readable city names (cached in memory).
 - Use `LocationBadge` widget for rendering location chips that open Google Maps / Maps app on tap.
 
+### E. Localization & Internationalization (l10n)
+- **Strictly No Hardcoded Strings**: All user-facing UI text, button labels, titles, dialog messages, tooltips, and snackbars MUST be localized. Never hardcode German or English strings directly in widget trees.
+- **Mandatory Bilingual Maintenance**: Whenever new UI features, dialogs, or text modifications are made, corresponding entries MUST be added to BOTH `lib/l10n/app_de.arb` (German template) AND `lib/l10n/app_en.arb` (English).
+- **Code Generation**: Run `flutter gen-l10n` whenever `.arb` files are touched.
+- **Extension Access**: Access translations using `context.l10n.<key>` via `import 'package:game_stats/l10n/l10n_extension.dart';`.
+
 ---
 
 ## 4. Verification & Validation Commands
