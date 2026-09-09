@@ -12,21 +12,25 @@ import 'ui/screens/dashboard_screen.dart';
 import 'ui/screens/game_library_screen.dart';
 import 'ui/screens/match_entry_screen.dart';
 import 'ui/screens/players_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'ui/screens/account_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  final dbService = DatabaseService();
-  await dbService.init();
-  await dbService.deduplicateMatchRecords();
 
-  // Initialize Supabase client
+  // 1. Initialize Supabase client first to detect any restored session
+  String? currentUserId;
   try {
     await SupabaseService.initialize();
+    currentUserId = Supabase.instance.client.auth.currentUser?.id;
   } catch (e) {
     debugPrint('Supabase initialization error: $e');
   }
+
+  // 2. Initialize DatabaseService with the active user's database (or guest)
+  final dbService = DatabaseService();
+  await dbService.init(userId: currentUserId);
+  await dbService.deduplicateMatchRecords();
 
   runApp(
     ProviderScope(
@@ -60,14 +64,14 @@ class MainApp extends ConsumerWidget {
   }
 }
 
-class MainScaffold extends StatefulWidget {
+class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key});
 
   @override
-  State<MainScaffold> createState() => _MainScaffoldState();
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends State<MainScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
@@ -92,6 +96,25 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+
+    // Listen for account changes (login, logout, account switch)
+    ref.listen<User?>(currentUserProvider, (previous, next) async {
+      if (previous?.id != next?.id) {
+        final db = ref.read(databaseProvider);
+        await db.switchUser(next?.id);
+        ref.invalidate(matchRecordsProvider);
+        ref.invalidate(playersProvider);
+        ref.invalidate(gamesProvider);
+        ref.invalidate(myPlayerProvider);
+        ref.invalidate(myProfileProvider);
+        ref.invalidate(friendsListProvider);
+
+        // When a user logs in, automatically sync their data from the cloud
+        if (next != null) {
+          await ref.read(syncProvider.notifier).performSync();
+        }
+      }
+    });
 
     return Scaffold(
       body: IndexedStack(

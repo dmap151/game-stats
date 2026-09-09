@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
 
 import '../data/models/player.dart';
 import '../services/friends_service.dart';
@@ -27,9 +26,6 @@ final friendsListProvider = FutureProvider<List<FriendProfile>>((ref) async {
 /// Streams the local player marked as "Me", or null if not yet selected.
 final myPlayerProvider = StreamProvider<Player?>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.isar.players
-      .filter()
-      .isMeEqualTo(true)
-      .watch(fireImmediately: true)
-      .map((list) => list.isEmpty ? null : list.first);
+  ref.watch(currentUserProvider);
+  return db.listenToMyPlayer();
 });

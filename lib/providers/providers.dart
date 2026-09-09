@@ -5,6 +5,7 @@ import '../data/models/match_record.dart';
 import '../data/models/player_statistics.dart';
 import '../data/models/player.dart';
 import '../services/backup_service.dart';
+import 'auth_provider.dart';
 export 'locale_provider.dart';
 export 'theme_provider.dart';
 export 'auth_provider.dart';
@@ -27,18 +28,21 @@ final backupServiceProvider = Provider<BackupService>((ref) {
 /// The UI will automatically rebuild when a new match is added or modified.
 final matchRecordsProvider = StreamProvider<List<MatchRecord>>((ref) {
   final db = ref.watch(databaseProvider);
+  ref.watch(currentUserProvider);
   return db.listenToMatchRecords();
 });
 
 /// Streams all players from the database.
 final playersProvider = StreamProvider<List<Player>>((ref) {
   final db = ref.watch(databaseProvider);
+  ref.watch(currentUserProvider);
   return db.listenToPlayers();
 });
 
 /// Streams all games from the database.
 final gamesProvider = StreamProvider<List<Game>>((ref) {
   final db = ref.watch(databaseProvider);
+  ref.watch(currentUserProvider);
   return db.listenToGames();
 });
 

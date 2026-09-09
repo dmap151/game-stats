@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -7,15 +8,124 @@ import 'models/player.dart';
 
 class DatabaseService {
   late Isar isar;
+  String? _currentUserId;
+  final Future<Directory> Function()? _baseDirProvider;
 
-  /// Initializes the Isar database and opens the necessary schemas.
-  /// This must be called before any other database operations.
-  Future<void> init() async {
-    final dir = await getApplicationDocumentsDirectory();
+  DatabaseService({Future<Directory> Function()? baseDirProvider})
+      : _baseDirProvider = baseDirProvider;
+
+  String? get currentUserId => _currentUserId;
+
+  /// Initializes the Isar database for a specific user, or guest if userId is null.
+  Future<void> init({String? userId}) async {
+    _currentUserId = userId;
+    final baseDir = _baseDirProvider != null
+        ? await _baseDirProvider()
+        : await getApplicationDocumentsDirectory();
+    final String instanceName = userId != null
+        ? 'user_${userId.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_')}'
+        : 'guest';
+
+    // If an instance is already open with this name, reuse it
+    final existingInstance = Isar.getInstance(instanceName);
+    if (existingInstance != null && existingInstance.isOpen) {
+      isar = existingInstance;
+      return;
+    }
+
+    // Directory for this user
+    final String targetPath = userId != null
+        ? '${baseDir.path}/users/$userId'
+        : '${baseDir.path}/guest';
+
+    final targetDir = Directory(targetPath);
+    final bool isFirstTimeUser = !targetDir.existsSync();
+    if (!targetDir.existsSync()) {
+      await targetDir.create(recursive: true);
+    }
+
     isar = await Isar.open(
       [GameSchema, MatchRecordSchema, PlayerSchema],
-      directory: dir.path,
+      directory: targetPath,
+      name: instanceName,
     );
+
+    // If this is the first time a user is opened on this device,
+    // and legacy default.isar exists in baseDir, migrate data into this user's DB
+    if (userId != null && isFirstTimeUser) {
+      await _migrateLegacyDataIfPresent(baseDir.path);
+    }
+  }
+
+  /// Migrates legacy records from the default root Isar instance if it exists.
+  Future<void> _migrateLegacyDataIfPresent(String basePath) async {
+    final legacyFile = File('$basePath/default.isar');
+    if (!legacyFile.existsSync()) return;
+
+    try {
+      final legacyInstance = Isar.getInstance('default') ??
+          await Isar.open(
+            [GameSchema, MatchRecordSchema, PlayerSchema],
+            directory: basePath,
+            name: 'default',
+          );
+
+      final legacyGames = await legacyInstance.games.where().findAll();
+      final legacyPlayers = await legacyInstance.players.where().findAll();
+      final legacyMatches = await legacyInstance.matchRecords.where().findAll();
+
+      if (legacyGames.isNotEmpty || legacyPlayers.isNotEmpty || legacyMatches.isNotEmpty) {
+        await isar.writeTxn(() async {
+          for (final g in legacyGames) {
+            await isar.games.put(Game()
+              ..name = g.name
+              ..imagePath = g.imagePath);
+          }
+          for (final p in legacyPlayers) {
+            await isar.players.put(Player()
+              ..name = p.name
+              ..imagePath = p.imagePath
+              ..isMe = p.isMe
+              ..linkedUserId = p.linkedUserId
+              ..friendCode = p.friendCode);
+          }
+          for (final m in legacyMatches) {
+            final gameName = m.game.value?.name;
+            Game? matchingGame;
+            if (gameName != null) {
+              matchingGame = await isar.games.where().nameEqualTo(gameName).findFirst();
+            }
+            final newMatch = MatchRecord()
+              ..date = m.date
+              ..numberOfPlayers = m.numberOfPlayers
+              ..imagePath = m.imagePath
+              ..imagePaths = List.from(m.imagePaths)
+              ..latitude = m.latitude
+              ..longitude = m.longitude
+              ..playerScores = m.playerScores.map((ps) => PlayerScore()
+                ..playerId = ps.playerId
+                ..playerName = ps.playerName
+                ..placement = ps.placement
+                ..score = ps.score
+                ..linkedUserId = ps.linkedUserId).toList();
+            newMatch.game.value = matchingGame;
+            await isar.matchRecords.put(newMatch);
+            await newMatch.game.save();
+          }
+        });
+      }
+    } catch (_) {
+      // Non-critical migration fallback
+    }
+  }
+
+  /// Switches the database to the specified user (or guest if null).
+  Future<void> switchUser(String? newUserId) async {
+    if (_currentUserId == newUserId && isar.isOpen) {
+      return;
+    }
+    await init(userId: newUserId);
+    await deduplicateMatchRecords();
   }
 
   // --- Player Methods ---
@@ -87,6 +197,15 @@ class DatabaseService {
   /// Returns the player designated as "Me" (current device user), if set.
   Future<Player?> getMyPlayer() async {
     return await isar.players.filter().isMeEqualTo(true).findFirst();
+  }
+
+  /// Returns a stream that emits the player designated as "Me", or null.
+  Stream<Player?> listenToMyPlayer() {
+    return isar.players
+        .filter()
+        .isMeEqualTo(true)
+        .watch(fireImmediately: true)
+        .map((list) => list.isEmpty ? null : list.first);
   }
 
   /// Sets exactly one player as "Me" and unsets isMe on all other players.
