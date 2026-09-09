@@ -141,6 +141,10 @@
   "languageSystem": "System Default",
   "languageGerman": "Deutsch",
   "languageEnglish": "English",
+  "themeSectionTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
 
   "sortNameAsc": "Name (A–Z)",
   "sortNameDesc": "Name (Z–A)",

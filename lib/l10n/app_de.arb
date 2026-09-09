@@ -141,6 +141,10 @@
   "languageSystem": "Systemstandard",
   "languageGerman": "Deutsch",
   "languageEnglish": "English",
+  "themeSectionTitle": "Erscheinungsbild",
+  "themeSystem": "System",
+  "themeLight": "Hell",
+  "themeDark": "Dunkel",
 
   "sortNameAsc": "Name (A–Z)",
   "sortNameDesc": "Name (Z–A)",

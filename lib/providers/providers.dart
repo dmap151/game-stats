@@ -6,6 +6,7 @@ import '../data/models/player_statistics.dart';
 import '../data/models/player.dart';
 import '../services/backup_service.dart';
 export 'locale_provider.dart';
+export 'theme_provider.dart';
 
 /// Provides the singleton instance of [DatabaseService].
 /// Must be overridden in the ProviderScope at the root of the app.
