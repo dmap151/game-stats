@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 CREATE INDEX IF NOT EXISTS idx_profiles_friend_code ON public.profiles(friend_code);
 
 -- 2. Hilfsfunktion zur Generierung eines Freunde-Codes (z. B. PLAY-4921)
-CREATE OR REPLACE FUNCTION generate_unique_friend_code(user_name TEXT)
+CREATE OR REPLACE FUNCTION public.generate_unique_friend_code(user_name TEXT)
 RETURNS TEXT AS $$
 DECLARE
     clean_prefix TEXT;
@@ -39,7 +39,7 @@ BEGIN
 
     RETURN new_code;
 END;
-$$ LANGUAGE plpgsql VOLATILE;
+$$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = public;
 
 -- 3. Trigger: Profil automatisch bei Registrierung eines Nutzers anlegen
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -51,22 +51,31 @@ BEGIN
     user_name := COALESCE(
         NEW.raw_user_meta_data->>'full_name',
         NEW.raw_user_meta_data->>'name',
-        SPLIT_PART(NEW.email, '@', 1)
+        SPLIT_PART(NEW.email, '@', 1),
+        'Spieler'
     );
-    assigned_code := generate_unique_friend_code(user_name);
+    IF user_name IS NULL OR TRIM(user_name) = '' THEN
+        user_name := 'Spieler';
+    END IF;
+
+    assigned_code := public.generate_unique_friend_code(user_name);
 
     INSERT INTO public.profiles (id, display_name, friend_code, avatar_url)
     VALUES (
         NEW.id,
-        COALESCE(user_name, 'Spieler'),
+        user_name,
         assigned_code,
         NEW.raw_user_meta_data->>'avatar_url'
     )
     ON CONFLICT (id) DO NOTHING;
 
     RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+    -- Ein Fehler bei der Profil-Generierung darf NIEMALS den User-Sign-Up blockieren!
+    RAISE WARNING 'handle_new_user trigger error: %', SQLERRM;
+    RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -116,11 +125,20 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.friendships ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Jeder angemeldete Nutzer darf Profile lesen (zum Suchen von Freunden)
+GRANT ALL ON public.profiles TO authenticated, service_role;
+GRANT SELECT ON public.profiles TO anon;
+
 DROP POLICY IF EXISTS "Public profiles are viewable by authenticated users" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by authenticated users"
     ON public.profiles FOR SELECT
     TO authenticated
     USING (true);
+
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+CREATE POLICY "Users can insert own profile"
+    ON public.profiles FOR INSERT
+    TO authenticated
+    WITH CHECK (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
