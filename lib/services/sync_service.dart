@@ -1,9 +1,12 @@
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/database_service.dart';
 import '../data/models/game.dart';
 import '../data/models/match_record.dart';
 import '../data/models/player.dart';
+import 'storage_service.dart';
 import 'supabase_service.dart';
 
 enum SyncStatus { idle, syncing, success, error }
@@ -39,8 +42,10 @@ class SyncState {
 class SyncService {
   final DatabaseService _db;
   final SupabaseService _supabase;
+  final StorageService? storage;
+  StorageService? get _storage => storage;
 
-  SyncService(this._db, this._supabase);
+  SyncService(this._db, this._supabase, {this.storage});
 
   SupabaseClient get _client => _supabase.client;
 
@@ -208,6 +213,60 @@ class SyncService {
     final localMatches = await _db.getAllMatchRecords();
     final localPlayers = await _db.getAllPlayers();
 
+    // Helper to upload photos for a match
+    Future<({String? mainUrl, List<String> additionalUrls})> uploadMatchPhotos(
+      MatchRecord m,
+    ) async {
+      final s = _storage;
+      if (s == null) {
+        return (mainUrl: null, additionalUrls: <String>[]);
+      }
+
+      String? mainUrl;
+      if (m.imagePath != null && m.imagePath!.isNotEmpty) {
+        if (m.imagePath!.startsWith('http')) {
+          mainUrl = m.imagePath;
+        } else {
+          final file = File(m.imagePath!);
+          if (file.existsSync()) {
+            final ext = p.extension(file.path).replaceAll('.', '');
+            final cleanExt = ext.isNotEmpty ? ext : 'jpg';
+            final fileName = 'match_${m.id}_0_${DateTime.now().millisecondsSinceEpoch}.$cleanExt';
+            mainUrl = await s.uploadMatchPhoto(
+              userId: userId,
+              file: file,
+              fileName: fileName,
+            );
+          }
+        }
+      }
+
+      final additionalUrls = <String>[];
+      for (int i = 0; i < m.imagePaths.length; i++) {
+        final imgPath = m.imagePaths[i];
+        if (imgPath.startsWith('http')) {
+          additionalUrls.add(imgPath);
+        } else {
+          final file = File(imgPath);
+          if (file.existsSync()) {
+            final ext = p.extension(file.path).replaceAll('.', '');
+            final cleanExt = ext.isNotEmpty ? ext : 'jpg';
+            final fileName = 'match_${m.id}_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.$cleanExt';
+            final url = await s.uploadMatchPhoto(
+              userId: userId,
+              file: file,
+              fileName: fileName,
+            );
+            if (url != null) {
+              additionalUrls.add(url);
+            }
+          }
+        }
+      }
+
+      return (mainUrl: mainUrl, additionalUrls: additionalUrls);
+    }
+
     // 1. Upload local matches
     for (final match in localMatches) {
       final gameName = match.game.value?.name ?? 'Unbekanntes Spiel';
@@ -216,7 +275,7 @@ class SyncService {
       // Check if match already uploaded by local_id or date
       final existing = await _client
           .from('matches')
-          .select('id')
+          .select('id, image_url, image_urls')
           .eq('user_id', userId)
           .eq('local_id', match.id)
           .maybeSingle();
@@ -225,26 +284,43 @@ class SyncService {
         // Also check by date + game_name
         final existingByDate = await _client
             .from('matches')
-            .select('id')
+            .select('id, image_url, image_urls')
             .eq('user_id', userId)
             .eq('date', matchDateUtcIso)
             .eq('game_name', gameName)
             .maybeSingle();
 
         if (existingByDate == null) {
-          final insertedMatch = await _client
-              .from('matches')
-              .insert({
-                'user_id': userId,
-                'local_id': match.id,
-                'game_name': gameName,
-                'date': matchDateUtcIso,
-                'duration_minutes': 0,
-                'latitude': match.latitude,
-                'longitude': match.longitude,
-              })
-              .select('id')
-              .single();
+          final uploaded = await uploadMatchPhotos(match);
+
+          final insertData = <String, dynamic>{
+            'user_id': userId,
+            'local_id': match.id,
+            'game_name': gameName,
+            'date': matchDateUtcIso,
+            'duration_minutes': 0,
+            'latitude': match.latitude,
+            'longitude': match.longitude,
+          };
+          if (uploaded.mainUrl != null) {
+            insertData['image_url'] = uploaded.mainUrl;
+          }
+          if (uploaded.additionalUrls.isNotEmpty) {
+            insertData['image_urls'] = uploaded.additionalUrls;
+          }
+
+          Map<String, dynamic> insertedMatch;
+          try {
+            insertedMatch = await _client.from('matches').insert(insertData).select('id').single();
+          } catch (e) {
+            if (insertData.containsKey('image_url') || insertData.containsKey('image_urls')) {
+              insertData.remove('image_url');
+              insertData.remove('image_urls');
+              insertedMatch = await _client.from('matches').insert(insertData).select('id').single();
+            } else {
+              rethrow;
+            }
+          }
 
           final matchId = insertedMatch['id'] as String;
 
@@ -274,6 +350,36 @@ class SyncService {
             });
           }
           count++;
+        } else if (_storage != null && match.imagePath != null && File(match.imagePath!).existsSync()) {
+          // If match exists remotely but has no image_url, upload and update it
+          final existingId = existingByDate['id'] as String;
+          final existingImageUrl = existingByDate['image_url'] as String?;
+          if (existingImageUrl == null) {
+            final uploaded = await uploadMatchPhotos(match);
+            if (uploaded.mainUrl != null) {
+              try {
+                await _client.from('matches').update({
+                  'image_url': uploaded.mainUrl,
+                  if (uploaded.additionalUrls.isNotEmpty) 'image_urls': uploaded.additionalUrls,
+                }).eq('id', existingId);
+              } catch (_) {}
+            }
+          }
+        }
+      } else if (_storage != null && match.imagePath != null && File(match.imagePath!).existsSync()) {
+        // If match exists remotely but has no image_url, upload and update it
+        final existingId = existing['id'] as String;
+        final existingImageUrl = existing['image_url'] as String?;
+        if (existingImageUrl == null) {
+          final uploaded = await uploadMatchPhotos(match);
+          if (uploaded.mainUrl != null) {
+            try {
+              await _client.from('matches').update({
+                'image_url': uploaded.mainUrl,
+                if (uploaded.additionalUrls.isNotEmpty) 'image_urls': uploaded.additionalUrls,
+              }).eq('id', existingId);
+            } catch (_) {}
+          }
         }
       }
     }
@@ -293,24 +399,72 @@ class SyncService {
       final remoteUserId = remote['user_id'] as String?;
       final remoteDateUtc = DateTime.parse(remote['date'] as String).toUtc();
       final gameName = remote['game_name'] as String;
+      final remoteImageUrl = remote['image_url'] as String?;
+      final rawRemoteImageUrls = remote['image_urls'];
+      final remoteImageUrls = rawRemoteImageUrls is List
+          ? rawRemoteImageUrls.map((e) => e.toString()).toList()
+          : <String>[];
 
-      // Only check local_id if this match was created on this user's account
-      if (remoteLocalId != null && remoteUserId == userId) {
-        final matchWithId = currentLocalMatches.any((m) => m.id == remoteLocalId.toInt());
-        if (matchWithId) {
-          continue;
+      // Download remote photos to local device cache if available
+      String? localMainImagePath;
+      final localAdditionalImagePaths = <String>[];
+
+      final s = _storage;
+      if (s != null) {
+        if (remoteImageUrl != null && remoteImageUrl.startsWith('http')) {
+          final ext = p.extension(remoteImageUrl).split('?').first;
+          final cleanExt = ext.isNotEmpty ? ext : '.jpg';
+          final localFileName = 'match_${remote['id']}_0$cleanExt';
+          localMainImagePath = await s.downloadPhotoToLocalCache(
+            imageUrl: remoteImageUrl,
+            localFileName: localFileName,
+          );
+        }
+
+        for (int i = 0; i < remoteImageUrls.length; i++) {
+          final url = remoteImageUrls[i];
+          if (url.startsWith('http')) {
+            final ext = p.extension(url).split('?').first;
+            final cleanExt = ext.isNotEmpty ? ext : '.jpg';
+            final localFileName = 'match_${remote['id']}_${i + 1}$cleanExt';
+            final downloadedPath = await s.downloadPhotoToLocalCache(
+              imageUrl: url,
+              localFileName: localFileName,
+            );
+            if (downloadedPath != null) {
+              localAdditionalImagePaths.add(downloadedPath);
+            }
+          }
         }
       }
 
-      // Check if already present on this device by date & game name (within 180 minutes to cover timezone differences)
-      final matchWithTimeAndGame = currentLocalMatches.any((m) {
-        final diffMinutes = (m.date.toUtc().difference(remoteDateUtc)).abs().inMinutes;
-        final sameGame = m.game.value?.name != null &&
-            m.game.value!.name.toLowerCase() == gameName.toLowerCase();
-        return diffMinutes <= 180 && sameGame;
-      });
+      // Check if match already exists locally
+      MatchRecord? existingMatch;
+      if (remoteLocalId != null && remoteUserId == userId) {
+        existingMatch = currentLocalMatches.cast<MatchRecord?>().firstWhere(
+          (m) => m?.id == remoteLocalId.toInt(),
+          orElse: () => null,
+        );
+      }
+      existingMatch ??= currentLocalMatches.cast<MatchRecord?>().firstWhere(
+        (m) {
+          if (m == null) return false;
+          final diffMinutes = (m.date.toUtc().difference(remoteDateUtc)).abs().inMinutes;
+          final sameGame = m.game.value?.name != null &&
+              m.game.value!.name.toLowerCase() == gameName.toLowerCase();
+          return diffMinutes <= 180 && sameGame;
+        },
+        orElse: () => null,
+      );
 
-      if (matchWithTimeAndGame) {
+      if (existingMatch != null) {
+        // If local match has no photos, but remote has photos, update local match
+        if ((existingMatch.imagePath == null || existingMatch.imagePath!.isEmpty) &&
+            (localMainImagePath != null || localAdditionalImagePaths.isNotEmpty)) {
+          existingMatch.imagePath = localMainImagePath;
+          existingMatch.imagePaths = localAdditionalImagePaths;
+          await _db.saveMatchRecord(existingMatch);
+        }
         continue;
       }
 
@@ -373,6 +527,8 @@ class SyncService {
       final newMatch = MatchRecord()
         ..date = remoteDateUtc.toLocal()
         ..numberOfPlayers = scores.isNotEmpty ? scores.length : 1
+        ..imagePath = localMainImagePath
+        ..imagePaths = localAdditionalImagePaths
         ..latitude = (remote['latitude'] as num?)?.toDouble()
         ..longitude = (remote['longitude'] as num?)?.toDouble()
         ..playerScores = scores;

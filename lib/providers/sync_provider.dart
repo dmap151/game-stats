@@ -1,13 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/storage_service.dart';
 import '../services/sync_service.dart';
 import 'providers.dart';
+
+final storageServiceProvider = Provider<StorageService?>((ref) {
+  try {
+    final supabase = ref.watch(supabaseServiceProvider);
+    return StorageService(supabase.client);
+  } catch (_) {
+    return null;
+  }
+});
 
 final syncServiceProvider = Provider<SyncService?>((ref) {
   try {
     final db = ref.watch(databaseProvider);
     final supabase = ref.watch(supabaseServiceProvider);
-    return SyncService(db, supabase);
+    final storage = ref.watch(storageServiceProvider);
+    return SyncService(db, supabase, storage: storage);
   } catch (_) {
     return null;
   }

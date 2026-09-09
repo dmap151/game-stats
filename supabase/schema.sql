@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS public.matches (
     location_name TEXT,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
+    image_url TEXT,
+    image_urls JSONB DEFAULT '[]'::jsonb,
     notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -175,3 +177,46 @@ CREATE POLICY "Users can delete match scores"
     ON public.match_player_scores FOR DELETE
     TO authenticated
     USING (public.get_match_owner(match_id) = auth.uid());
+
+-- ==============================================================================
+-- 7. Supabase Storage Setup für Partiefotos
+-- ==============================================================================
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('match-images', 'match-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+DROP POLICY IF EXISTS "Public or Authenticated Read Match Images" ON storage.objects;
+DROP POLICY IF EXISTS "Users Can Upload Match Images" ON storage.objects;
+DROP POLICY IF EXISTS "Users Can Update Their Own Match Images" ON storage.objects;
+DROP POLICY IF EXISTS "Users Can Delete Their Own Match Images" ON storage.objects;
+
+CREATE POLICY "Public or Authenticated Read Match Images"
+ON storage.objects FOR SELECT
+TO authenticated, anon
+USING (bucket_id = 'match-images');
+
+CREATE POLICY "Users Can Upload Match Images"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+    bucket_id = 'match-images'
+    AND (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+CREATE POLICY "Users Can Update Their Own Match Images"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+    bucket_id = 'match-images'
+    AND (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+CREATE POLICY "Users Can Delete Their Own Match Images"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+    bucket_id = 'match-images'
+    AND (auth.uid()::text = (storage.foldername(name))[1])
+);
+
